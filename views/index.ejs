@@ -2,10 +2,29 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <% include relyOn.ejs %>
+
+    <style type="text/css">
+
+
+    </style>
+
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+
+    <div>
+      <form action="users/addUser" method="post">
+        <div>
+          <label for="userName">用户名:</label><input name="userName" type="text">
+        </div>
+
+        <div>
+          <label for="passWord">密码:</label><input name="passWord" type="text">
+        </div>
+
+        <button type="submit">提交</button>
+      </form>
+    </div>
+
   </body>
 </html>

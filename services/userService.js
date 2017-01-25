@@ -6,13 +6,13 @@ var mongoose = require("mongoose");    //引用mongoose模块
 
 var Schema = mongoose.Schema;
 
-var userSchema = new Schema({
+let userSchema = new Schema({
     userName:String,
     passWord:String,
     createTime:{type: Date,default:Date.now()}
 });
 
-var userModel = mongoose.model("user",userSchema);//声明集合
+let userModel = mongoose.model("user",userSchema);//声明集合
 
 module.exports = userModel;
 

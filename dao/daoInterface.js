@@ -7,15 +7,22 @@ mongoose.connect("mongodb://localhost:27017/mhr");
 
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function (callback) {
-    console.log("数据库连接成功");
+db.once('open', function (err,callback) {
+    if (err)
+    {
+        console.error("数据库连接失败",err);
+    }
+    else
+    {
+        console.log("数据库连接成功");
+    }
 });
 
 //存储所有模型的对象
 let model = {};
 
 //获取用户模型
-model.userModel = require("../model/user.service.model");
+/*model.userModel = require("../models/user.service.model");*/
 
 
-module.export = model;
+module.exports = model;
