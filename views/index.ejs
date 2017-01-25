@@ -1,11 +1,28 @@
+<!--使用web应用模式,所有功能均通过修改该页面的内部iframe展示-->
+
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
   <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <% include relyOn.ejs %><!--设置meta和导入依赖-->
+    <title>医疗健康档案管理系统</title>
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+
+    <!--页面头部-->
+    <div class="wu_head"></div>
+
+    <!--页面左侧功能显示栏-->
+    <div class="wu_left_tree"></div>
+
+    <!--页面中部数据操作栏-->
+    <div class="wu_center">
+      <iframe></iframe>
+    </div>
+
+    <!--页面脚部,开发信息显示栏-->
+    <div class="wu_foot"></div>
+
+    <p>测试</p>
+
   </body>
 </html>

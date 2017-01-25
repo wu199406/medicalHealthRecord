@@ -5,12 +5,16 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');//提供从请求读取cookie和在相应中设置cookie的功能
 var bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+//引入数据库接口，启动mongodb数据库
+var dao = require("./dao/daoInterface.js");
+
+//引入路由模块
+var index = require('./routes/indexRout');
+var users = require('./routes/usersRout');
 
 var app = express();
 
-// view engine setup
+// view engine setup，设置和配置模版引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -20,9 +24,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(express.static('public'));//管理静态文件
+app.use(express.static(path.join(__dirname, 'public')));//管理静态文件
 
 app.use('/', index);
 app.use('/users', users);
