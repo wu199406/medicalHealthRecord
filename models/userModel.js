@@ -11,7 +11,7 @@ let userSchema = new Schema({
     passWord:String,//登录密码
     name:String,//用户名称
     createTime:{type: Date,default:Date.now()},//创建时间
-    roles:[{type:String}]//权限角色数组
+    roles:[{type:Schema.Types.ObjectId,ref:"role"}]//权限角色数组
 });
 
 //添加静态方法
