@@ -3,6 +3,9 @@
  */
 //获取mongoose模块以及连接对应url的mongodb数据库
 let mongoose = require("mongoose");
+
+mongoose.Promise = global.Promise;//mongoose使用promise
+
 mongoose.connect("mongodb://localhost:27017/mhr");
 
 let db = mongoose.connection;
@@ -23,6 +26,7 @@ let model = {};
 
 //获取用户模型
 model.userModel = require("../models/userModel");
-
+model.roleModel = require("../models/roleModel");
+model.resourceModel = require("../models/resourceModel");
 
 module.exports = model;

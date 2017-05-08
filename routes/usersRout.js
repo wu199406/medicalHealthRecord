@@ -1,9 +1,5 @@
 let express = require('express');
 let router = express.Router();
-/*let mongoose = require("mongoose");
-
-//导入
-let userModel = mongoose.model("user");*/
 
 let userService = require("../service/userService");
 
@@ -18,8 +14,8 @@ router.post("/addUser",function(req, res, next){
     let body = req.body;
 
     let result = userService.addUserPromise({"userName":body.userName,"passWord":body.passWord});
-    result.then(result=>{res.send(result);req.end();})
-          .catch(err=>{res.send(result);req.end();})
+    result.then(result=>{res.send(result);res.end();})
+          .catch(err=>{res.send(result);res.end();});
 });
 
 

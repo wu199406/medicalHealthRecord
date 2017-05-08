@@ -16,6 +16,6 @@ let resourceSchema = new Schema({
 
 //添加静态方法
 
-let resourceModel = mongoose.model("role",resourceSchema);//声明集合
+let resourceModel = mongoose.model("resource",resourceSchema);//声明集合
 
-module.exports = roleModel;
+module.exports = resourceModel;

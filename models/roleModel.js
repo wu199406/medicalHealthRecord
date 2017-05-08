@@ -6,6 +6,7 @@
  */
 
 let mongoose = require("mongoose");//引用mongoose模块
+
 let Schema = mongoose.Schema;
 
 let roleSchema = new Schema({
@@ -18,4 +19,4 @@ let roleSchema = new Schema({
 
 let roleModel = mongoose.model("role",roleSchema);//声明集合
 
-module.exports = resourceModel;
+module.exports = roleModel;

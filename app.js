@@ -11,6 +11,7 @@ var dao = require("./dao/daoInterface.js");
 //引入路由模块
 var index = require('./routes/indexRout');
 var users = require('./routes/usersRout');
+var role = require('./routes/roleRout');
 
 var app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));//管理静态文件
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/role', role);
 
 // catch 404 and forward to error handler
 //找不到错误
