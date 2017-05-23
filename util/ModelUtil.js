@@ -84,9 +84,9 @@ class ModelUtil
      */
     static getPropertyNotNullObject(obj)
     {
-        let updatePropertyNames = Reflect.ownKeys(entity);
+        let updatePropertyNames = Reflect.ownKeys(obj);
         updatePropertyNames = updatePropertyNames.filter(function(element, index, array){
-            let value = entity[element];
+            let value = obj[element];
             if( value!=undefined && value!=null )
             {
                 if( typeof value == "string" && value.trim() == "" )

@@ -9,7 +9,6 @@ let mongoose = require("mongoose");//引用mongoose模块
 let Schema = mongoose.Schema;
 
 let resourceSchema = new Schema({
-    id:Schema.Types.ObjectId,//id主键
     createTime:{type: Date,default:Date.now()},//创建时间
     name:String,
     url:String

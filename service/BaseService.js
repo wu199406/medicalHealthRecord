@@ -1,17 +1,13 @@
 /**
+ * 通用服务层
  * Created by wu199406 on 2017/5/13.
  */
-/*
-* 通用服务层
-*/
 
 let modelUtile = require("../util/ModelUtil");
 let util = require("../util/util");
 
 class BaseService
 {
-    model=null;
-
     /**
      *
      * @param model{mongoose.model} mongoose的model
@@ -31,12 +27,10 @@ class BaseService
         {
             let result = await this.model.create(entity);
 
-            console.log("添加成功");
-            console.log(result);
+            //return result;
         }
         catch (err)
         {
-            console.log("添加失败");
             return err;
         }
     }
@@ -52,14 +46,12 @@ class BaseService
         {
             let updateObj = modelUtile.getPropertyNotNullObject(entity);
 
-            let result = await this.model.update({id:entity.id},{$set:updateObj});
+            let result = await this.model.update({_id:entity.id},{$set:updateObj});
 
-            console.log("修改成功");
-            console.log(result);
+            return result;
         }
         catch (err)
         {
-            console.log("修改失败");
             return err;
         }
     }
@@ -73,9 +65,8 @@ class BaseService
     {
         if( util.isNotEmptyString(ids) )
         {
-            let result = await this.model.remove({id:id});
-            console.log("删除成功");
-            console.log(result);
+            let result = await this.model.remove({_id:id});
+            return result;
         }
     }
 
@@ -88,14 +79,39 @@ class BaseService
      */
     async findByPage(page,row,query)
     {
-        query = query.getPropertyNotNullObject(entity);
+        query = modelUtile.getPropertyNotNullObject(query);
         let [list,size] = await Promise.all([
-            this.model.find(query,{sort:[["id",1]],limit:row,skip:(page * row - 1)}),
-            this.model.find(query)
-        ])
-
+            this.findByPagePromise(page,row,query),
+            this.model.count(query)
+        ]);
         return {list : list,size: size};
     }
+
+    /**
+     * 为了使用分页查询，将moongoose的操作进行promise包装
+     * @param page
+     * @param row
+     * @param query
+     * @return {Promise}
+     */
+    findByPagePromise (page,row,query)
+    {
+        let that = this;
+        return new Promise(function (resolve, reject) {
+            that.model.find().where(query).sort({_id:1})
+                .limit(row).skip((page-1)*row).exec(function(err,results){
+                    if (err)
+                    {
+                        reject(err);
+                    }
+                    else
+                    {
+                        resolve(results);
+                    }
+            });
+        })
+    }
+
 }
 
 module.exports = BaseService;
