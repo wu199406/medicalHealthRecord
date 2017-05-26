@@ -24,7 +24,7 @@ db.once('open', function (err,callback) {
 //存储所有模型的对象
 let model = {};
 
-//获取用户模型
+//设置并获取用户模型
 model.userModel = require("../models/userModel");
 model.roleModel = require("../models/roleModel");
 model.resourceModel = require("../models/resourceModel");

@@ -27,7 +27,7 @@ class BaseService
         {
             let result = await this.model.create(entity);
 
-            //return result;
+            return result;
         }
         catch (err)
         {
@@ -44,9 +44,14 @@ class BaseService
     {
         try
         {
+            if( !entity._id )
+            {
+                return {flat:false,message:"更新时_id主键不能为空"};
+            }
+
             let updateObj = modelUtile.getPropertyNotNullObject(entity);
 
-            let result = await this.model.update({_id:entity.id},{$set:updateObj});
+            let result = await this.model.update({_id:entity._id},{$set:updateObj});
 
             return result;
         }
@@ -63,10 +68,14 @@ class BaseService
      */
     async deleteById(id)
     {
-        if( util.isNotEmptyString(ids) )
+        if( util.isNotEmptyString(id) )
         {
             let result = await this.model.remove({_id:id});
             return result;
+        }
+        else
+        {
+            return {flat:false,msg:"删除的_id不能为空"};
         }
     }
 
@@ -81,37 +90,11 @@ class BaseService
     {
         query = modelUtile.getPropertyNotNullObject(query);
         let [list,size] = await Promise.all([
-            this.findByPagePromise(page,row,query),
+            this.model.find().where(query).sort({_id:1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
         ]);
         return {list : list,size: size};
     }
-
-    /**
-     * 为了使用分页查询，将moongoose的操作进行promise包装
-     * @param page
-     * @param row
-     * @param query
-     * @return {Promise}
-     */
-    findByPagePromise (page,row,query)
-    {
-        let that = this;
-        return new Promise(function (resolve, reject) {
-            that.model.find().where(query).sort({_id:1})
-                .limit(row).skip((page-1)*row).exec(function(err,results){
-                    if (err)
-                    {
-                        reject(err);
-                    }
-                    else
-                    {
-                        resolve(results);
-                    }
-            });
-        })
-    }
-
 }
 
 module.exports = BaseService;
