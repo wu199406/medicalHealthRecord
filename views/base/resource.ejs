@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <% include ../relyOn.ejs %><!--设置meta和导入依赖-->
+        <title>资源管理</title>
+    </head>
+
+    <script type="text/javascript">
+
+        /* start 页面核心的初始化参数 */
+
+        $(function(){
+            //创建数据表格
+            resource.createDatagrid();
+        });
+
+        //相关信息的对象
+        var resource = {
+            /**
+             * 设置到的html元素的id
+             **/
+            ids:{
+                datagrid_id: "datagrid",//数据表格id
+                toolbar_id: "toolbar",//工具栏id
+                toolSearch_id: "toolSearch",//搜索栏id
+                queryform_id:"queryform",//搜索表单的id
+            },
+            /**
+             * 配置对象
+             **/
+            options:{
+                datagrid_url:	"/resource/selectPage",//数据表格的url
+                datagrid_query:	{status:""},//数据表格的额外的参数对象,默认的参数对象
+                addDialog_options: {href:"/resource/getAdd",title:"添加",width:"680",height:"280",modal: true,queryParams:{}},//添加表单的配置对象
+                editDialog_options: {href:"/resource/getEdit",title:"编辑",width:"680",height:"280",modal : true,queryParams:{}},//修改表单的配置对象
+                delete_url: "/resource/delete"//删除路径
+            },
+            /**
+             * 数据表格对象
+             **/
+            datagridObj: null,
+            /**
+             * 当前的数据表格的查询对象
+             **/
+            curentQueryParam: {},
+            /**
+             * 获取数据表格的配置对象
+             * @return 返回配置对象
+             **/
+            getdatagridOptions: function(){
+                var that = this;
+                return {
+                    url : this.options.datagrid_url,
+                    queryParams: this.options.datagrid_query,
+                    idField : 'id',
+                    fit : true,
+                    fitColumns : true,
+                    border : false,
+                    pagination : true,
+                    rownumbers : true,
+                    pageSize : 20,
+                    pageList : [ 10, 20, 30, 40, 50, 100, 200, 300, 400, 500 ],
+                    singleSelect: false,//只能选择一行
+                    frozenColumns : [ [ {
+                        title : 'id',
+                        field : 'id',
+                        width : 40,
+                        checkbox:true
+                    } ] ],
+                    columns : this.getDatagridColumns(),
+                    onLoadSuccess:function(data){
+                        $('.organization-easyui-linkbutton-edit').linkbutton({text:'维护',plain:true,iconCls:'icon-edit'});
+                        $('.organization-easyui-linkbutton-del').linkbutton({text:'删除',plain:true,iconCls:'icon-del'});
+                        that.datagridObj.datagrid("fixRownumber");
+                    },
+                    toolbar : "#"+this.ids.toolbar_id,
+                };
+            },
+            /**
+             * 获取数据表格的列字段数组
+             **/
+            getDatagridColumns: function(){
+                return [ [
+                    {field : "name",title : "资源名称",width : '200'},
+                    {field : "url",title : "资源路径",width : '100'},
+                    {field : "action",title : "操作",width : 150,
+                        formatter : function(value, row, index) {
+                            var str = '';
+                            str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-edit" data-options="plain:true,iconCls:\'icon-edit\'" onclick="resource.createEditDialog(\'{0}\');" >维护</a>', row.id);
+                            str += '&nbsp;&nbsp;|&nbsp;&nbsp;';
+                            str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-del" data-options="plain:true,iconCls:\'icon-del\'" onclick="resource.deleteFun(\'{0}\');" >删除</a>', row.id);
+                            return str;
+                        }
+                    }
+                ] ];
+            },
+            /**
+             * 数据表格的额外的配置参数对象
+             **/
+            extraDatagridOptions:{},
+            /**
+             * 该datagrid是否已经创建
+             */
+            isCreate: false,
+            /**
+             * 对外接口,用于创建数据表格
+             **/
+            createDatagrid: function(){
+                this.datagridObj = $("#"+this.ids.datagrid_id).datagrid( $.extend( {} , this.getdatagridOptions() , this.extraDatagridOptions ) );
+                $("#"+this.ids.toolbar_id).prepend($("#"+this.ids.toolSearch_id));
+                $("#"+this.ids.toolSearch_id).append("<hr>");
+                $("#"+this.ids.toolSearch_id).show();
+
+                $.extend( this.curentQueryParam , this.options.datagrid_query );//初始化数据表格的当前查询条件
+
+                this.isCreate = true;
+            },
+            /**
+             * 对外接口,用于创建添加窗口
+             **/
+            createAddDialog: function(){
+                var that = this;
+                $.extend(this.options.addDialog_options.queryParams,{});
+                this.options.addDialog_options.buttons = [
+                    {
+                        text:'保存',
+                        handler:function(){
+                            dialogHook.submitForm(function(result){
+                                if( result.success == true )
+                                {
+                                    $.messager.alert("信息",result.msg,"info");
+                                    that.datagridObj.datagrid('reload');//刷新数据表格
+                                    $.addDialog.dialog('close');//关闭面板
+                                }
+                                else
+                                {
+                                    $.messager.alert('info',result.msg,'error');//错误信息
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text:'取消',
+                        handler:function(){
+                            $.addDialog.dialog('close');
+                        }
+                    }
+                ];
+                this.options.addDialog_options.onClose = function(){$.addDialog.dialog('destroy');/* 销毁面板 */};
+
+                $.addDialog = $("<div></div>").dialog(this.options.addDialog_options);
+            },
+            /**
+             * 对外接口,创建编辑窗口
+             * @param id 记录的id主键
+             **/
+            createEditDialog: function(id){
+                if( id==null || id == '' || id == undefined)
+                {
+                    $.messager.alert('错误','未知的程序错误','error');
+                }
+                else
+                {
+                    var that = this;
+
+                    //使编辑的行被选择
+                    setTimeout(function(){that.datagridObj.datagrid("selectRecord",id);}, 0);
+
+                    $.extend(this.options.editDialog_options.queryParams,{id: id});
+
+                    this.options.editDialog_options.buttons = [
+                        {
+                            text:'保存',
+                            handler:function(){
+                                dialogHook.submitForm(function(result){
+                                    if( result.success == true )
+                                    {
+                                        $.messager.alert("信息",result.msg,"info");
+                                        that.datagridObj.datagrid('reload');//刷新数据表格
+                                        $.dialogEdit.dialog('close');//关闭面板
+                                    }
+                                    else
+                                    {
+                                        $.messager.alert('info',result.msg,'error');//错误信息
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            text:'取消',
+                            handler:function(){
+                                //关闭窗口
+                                $.dialogEdit.dialog('close');
+
+                            }
+                        }
+                    ];
+                    this.options.editDialog_options.onClose = function(){$.dialogEdit.dialog('destroy');/* 销毁面板 */};
+
+                    $.dialogEdit = $("<div></div>").dialog(this.options.editDialog_options);
+                }
+            },
+            /**
+             * 对外接口,删除数据表格的信息
+             **/
+            deleteFun: function(id){
+                var idArray = new Array();
+                if( id != null && id != undefined && id != '')//是行内删除
+                {
+                    idArray.push(id);
+                }
+                else//是行外删除
+                {
+                    //获取勾选的行的id
+                    var rows = this.datagridObj.datagrid('getChecked');
+                    for(var i=0;i < rows.length;i++)
+                    {
+                        idArray.push( rows[i].id );
+                    }
+                }
+
+                if( idArray.length > 0 )
+                {
+                    var that = this;
+                    $.messager.confirm('询问',"你确定要删除数据,这将会同时删除相关的合同分期信息。",function(b){
+                        if(b)//确定
+                        {
+                            progressLoad();
+                            //调用删除ajax
+                            $.post(that.options.delete_url,{idArray: JSON.stringify(idArray)},function(data){
+                                if(data.success)//插入成功
+                                {
+                                    //更新数据表格
+                                    that.datagridObj.datagrid('reload');
+                                }
+                                else//插入失败
+                                {
+                                    $.messager.alert('错误','删除失败','error');
+                                }
+                            },'json');
+
+                            that.datagridObj.datagrid('unselectAll').datagrid('uncheckAll'); //使所有的行均不被选择和勾选
+                            progressClose();
+                        }
+                        else
+                        {
+                            that.datagridObj.datagrid('unselectAll').datagrid('uncheckAll');
+                        }
+                    });
+                }
+                else
+                {
+                    $.messager.alert('信息','没有数据要删除!','info');
+                }
+            },
+            /**
+             * 对外接口,根据搜索栏进行查询
+             */
+            queryData: function(){
+                //获取搜索条件对象
+                var queryObject = $.serializeObject( $("#"+this.ids.queryform_id) );
+
+                $.extend( this.curentQueryParam ,  queryObject , this.options.datagrid_query );
+
+                //使用表单的序列化数据，作为数据表格的reload方法请求参数
+                this.datagridObj.datagrid('reload', this.curentQueryParam );
+            },
+            /**
+             * 对外接口,重置搜索栏和数据表格
+             */
+            resetForm: function(){
+                $("#"+this.ids.queryform_id).form('clear');
+
+                this.curentQueryParam = this.options.datagrid_query;
+
+                this.datagridObj.datagrid('reload', this.curentQueryParam);
+            },
+            /**
+             * 对外接口,引入外部数据表格的搜索参数对象
+             * @param param  参数对象
+             **/
+            queryByExternal: function(param){
+
+                //使用表单的序列化数据，作为数据表格的reload方法请求参数
+                this.datagridObj.datagrid('reload', $.extend(this.curentQueryParam , param) );
+            },
+            /**
+             * 对外接口,用于设置将要生成的datagrid的配置
+             **/
+            setDatagridOptions: function(optionsName , optionsValue){
+                if( this.isCreate == false )
+                {
+                    this.extraDatagridOptions[optionsName] = optionsValue;
+                }
+                else
+                {
+                    throw new error("数据表格已经创建不能设置其被指属性");
+                }
+            },
+            /* 事件管理 */
+            /**
+             * 事件对象
+             **/
+            events:{
+                /**
+                 * 添加新的记录或者修改记录成功时调用
+                 **/
+                onAddOrEditSuccess: function(){},
+            },
+            /**
+             * 对外接口,用于设置事件
+             */
+            setEvent: function(eventName , eventFun){
+                if( typeof eventFun == "function" )
+                {
+                    if( this.events[eventName] != undefined )
+                    {
+                        this.events[eventName] = eventFun;
+                    }
+                    else
+                    {
+                        throw new error(eventName+"时间不存在");
+                    }
+                }
+                else
+                {
+                    throw new error("eventFun属性的值不为函数");
+                }
+
+            },
+            /**
+             * 对内对外的事件触发方法
+             * @param	eventName	{String}	事件名称
+             * @param	params		{obj}		额外的参数对象
+             */
+            emitEvent: function(eventName,params){
+                this.events[eventName](params);
+            }
+        };
+    </script>
+
+    <body>
+        <div class="easyui-layout" data-options="fit:true,border:false">
+            <!-- start 数据表格内容 -->
+            <div class="easyui-layout" data-options="fit:true,border:false">
+                <!-- 数据检索 -->
+                <div id="toolSearch">
+                    <form id="queryform">
+                        <!-- <label for="materialName">原料名称:</label><input class="easyui-textbox" name="materialName" style="width:160px;height:25px;"> -->
+
+                        <a onclick="resource.queryData();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
+                        <a onclick="resource.resetForm();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-refresh'">重置</a>
+                    </form>
+                </div>
+                <!-- 数据列表 -->
+                <div data-options="region:'center',border:false"  style="overflow: hidden;">
+                    <table id="datagrid"></table>
+                </div>
+
+                <!-- 工具栏 -->
+                <div id="toolbar" style="display: none;">
+                    <a onclick="resource.createAddDialog();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">登记</a>
+                     <a onclick="resource.deleteFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">批量删除</a>
+                    <!-- <a onclick="inputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-undo'">数据导入</a>
+                    <a onclick="outputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-redo'">数据导出</a>
+                    <a onclick="moban();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-down'">模版下载</a> -->
+                </div>
+            </div>
+            <!-- end 数据表格内容 -->
+        </div>
+    </body>
+</html>

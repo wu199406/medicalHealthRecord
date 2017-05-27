@@ -1,0 +1,67 @@
+<script type="text/javascript">
+
+    /* 页面接口 */
+    var dialogHook = {
+        /**
+         * 供主页面使用的,当前窗口内的表单的提交方法
+         *
+         * @param callback 回调函数
+         *
+         */
+        submitForm: function(callback){
+            if( typeof callback == "function" )
+            {
+                $("#addFrom").form("submit",{
+                    url:"/resource/insert",
+                    onSubmit:function(param){
+                        var flat = $("#addFrom").form('validate');
+                        if(flat == false)
+                        {
+                            $.messager.alert('info','请检查输入的数据是否正确!','error');
+                            return false;
+                        }
+                        return true;
+                    },
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        callback(data);
+                    }
+                });
+            }
+            else
+            {
+                throw new error("callback参数的类必须为函数");
+            }
+        }
+    };
+
+</script>
+
+<style>
+    form td,form tr{
+        height:40px;
+    }
+
+</style>
+
+<div style="padding: 3px;">
+    <form id="addFrom" method="post">
+        <table class="grid">
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="name">资源名称:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="name" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="periodsTotal">资源名称:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="url" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>

@@ -23,16 +23,9 @@ class BaseService
      */
     async addOfBase(entity)
     {
-        try
-        {
-            let result = await this.model.create(entity);
+        let result = await this.model.create(entity);
 
-            return result;
-        }
-        catch (err)
-        {
-            return err;
-        }
+        return result;
     }
 
     /**
@@ -44,14 +37,14 @@ class BaseService
     {
         try
         {
-            if( !entity._id )
+            if( !entity.id )
             {
-                return {flat:false,message:"更新时_id主键不能为空"};
+                return {flat:false,message:"更新时id主键不能为空"};
             }
 
             let updateObj = modelUtile.getPropertyNotNullObject(entity);
 
-            let result = await this.model.update({_id:entity._id},{$set:updateObj});
+            let result = await this.model.update({id:entity.id},{$set:updateObj});
 
             return result;
         }
@@ -62,20 +55,20 @@ class BaseService
     }
 
     /**
-     * 删除一个文档
-     * @param id    文档的id
+     * 删除一个或者多个文档
+     * @param id {String|Array} 文档的id
      * @return {Promise.<void>}
      */
     async deleteById(id)
     {
         if( util.isNotEmptyString(id) )
         {
-            let result = await this.model.remove({_id:id});
+            let result = await this.model.remove({id:id});
             return result;
         }
-        else
+        else if( Array.isArray(id) )
         {
-            return {flat:false,msg:"删除的_id不能为空"};
+            await this.model.deleteMany().where("id").in(id).exec();
         }
     }
 
@@ -90,10 +83,24 @@ class BaseService
     {
         query = modelUtile.getPropertyNotNullObject(query);
         let [list,size] = await Promise.all([
-            this.model.find().where(query).sort({_id:1}).limit(row).skip((page-1)*row).exec(),
+            this.model.find().where(query).sort({id:1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
         ]);
-        return {list : list,size: size};
+        return {rows : list,total: size};
+    }
+
+    /**
+     * 根据id获取相应的文档
+     * @param id    {String}    id主键
+     * @return {Promise.<*>}
+     */
+    async findById(id)
+    {
+        if( util.isNotEmptyString(id) )
+        {
+            return await this.model.findOne({"id":id}).exec();
+        }
+        return null;
     }
 }
 
