@@ -1,5 +1,17 @@
 <script type="text/javascript">
 
+    $(function () {
+        console.log($('#parentResource')[0]);
+        $('#parentResource').combotree({
+            url:'/resource/getTree',
+            panelHeight:'auto',
+            panelMaxHeight:200,
+            editable:false,
+            animate:true,
+            lines:true
+        });
+    });
+
     /* 页面接口 */
     var dialogHook = {
         /**
@@ -41,7 +53,6 @@
     form td,form tr{
         height:40px;
     }
-
 </style>
 
 <div style="padding: 3px;">
@@ -56,10 +67,60 @@
                 </td>
 
                 <td class="trLeft width-15">
-                    <label for="periodsTotal">资源名称:</label>
+                    <label for="type">资源类型:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="type" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="periodsTotal">资源路径:</label>
                 </td>
                 <td class="trRight width-35">
                     <input class="easyui-textbox" name="url" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="sort">排序次序:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-numberspinner" name="sort" data-options="min:0,value:0" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="icon">资源的图标:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="icon" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="status">资源的状态:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="status" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="pid">父资源:</label>
+                </td>
+                <td class="trRight width-85" colspan="3">
+                    <input id="parentResource" name="pid" style="width: 530px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="note">资源的说明:</label>
+                </td>
+                <td class="trRight width-85" colspan="3">
+                    <input class="easyui-textbox" name="note" style="width: 530px; height: 29px;"/>
                 </td>
             </tr>
         </table>

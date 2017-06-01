@@ -24,18 +24,15 @@ router.get("/getEdit",function(req, res, next){
 
     let result = resourceService.findById(queryParam.id);
 
-     result.then(result=>{
-         console.log("测试");
-         console.log(result.toObject());
-         res.render('base/resourceEdit', {entity:result.toObject()});})
+     result.then(result=>{res.render('base/resourceEdit', {entity:result.toObject()});})
      .catch(err=>{res.send(JSON.stringify(err));res.end();})
 });
 
 router.all("/selectPage",function(req, res, next){
     //获取请求的内容对象
-    let body = req.body;
+    let queryParam = QueryParamUtil.getQueryParams(req);
+    let result = resourceService.findByPage(queryParam.page,queryParam.rows,{});
 
-    let result = resourceService.findByPage(1,20,{});
     result.then(result=>{res.send(result);res.end();})
         .catch(err=>{res.send(JSON.stringify(err));res.end();})
 });
@@ -68,6 +65,33 @@ router.all("/delete",function(req, res, next){
 
     result.then(result=>{ResponseUtil.returnResponseSuccess(res,"删除成功");})
         .catch(err=>{ResponseUtil.returnResponseErr(res,"删除失败",err);})
+});
+
+router.post("/getTree",function(req, res, next){
+    //获取请求的内容对象
+    let queryParam = QueryParamUtil.getQueryParams(req);
+
+    let result = resourceService.findOfTree(null);
+
+    result.then(result=>{res.send(result);res.end();})
+        .catch(err=>{res.send(JSON.stringify(err));res.end();})
+});
+
+router.all("/selectPageOfTree",async function(req, res, next){
+    //获取请求的内容对象
+    let {query,pageQuery} = QueryParamUtil.getQueryParamsNotFields(req,["page","rows"]);
+
+    try
+    {
+        let result = await resourceService.findByPageOfTree(pageQuery.page,pageQuery.rows,query);
+        res.send(result);
+    }
+    catch (e)
+    {
+        console.log(e);
+        res.send(JSON.stringify(e));
+    }
+    res.end();
 });
 
 module.exports = router;

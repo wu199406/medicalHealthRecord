@@ -1,20 +1,20 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');//提供从请求读取cookie和在相应中设置cookie的功能
-var bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
+let express = require('express');
+let path = require('path');
+let favicon = require('serve-favicon');
+let logger = require('morgan');
+let cookieParser = require('cookie-parser');//提供从请求读取cookie和在相应中设置cookie的功能
+let bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
 
 //引入数据库接口，启动mongodb数据库
-var dao = require("./dao/daoInterface.js");
+let dao = require("./dao/daoInterface.js");
 
 //引入路由模块
-var index = require('./routes/indexRout');
-var users = require('./routes/usersRout');
-var role = require('./routes/roleRout');
-var resource = require("./routes/resourceRout");
+let index = require('./routes/indexRout');
+let users = require('./routes/usersRout');
+let role = require('./routes/roleRout');
+let resource = require("./routes/resourceRout");
 
-var app = express();
+let app = express();
 
 // view engine setup，设置和配置模版引擎
 app.set('views', path.join(__dirname, 'views'));

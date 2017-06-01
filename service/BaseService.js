@@ -4,7 +4,7 @@
  */
 
 let modelUtile = require("../util/ModelUtil");
-let util = require("../util/util");
+let util = require("../util/Util");
 
 class BaseService
 {
@@ -81,12 +81,15 @@ class BaseService
      */
     async findByPage(page,row,query)
     {
+        page = Number(page);
+        row = Number(row);
+
         query = modelUtile.getPropertyNotNullObject(query);
-        let [list,size] = await Promise.all([
+        let [rows,total] = await Promise.all([
             this.model.find().where(query).sort({id:1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
         ]);
-        return {rows : list,total: size};
+        return {rows ,total};
     }
 
     /**
@@ -94,11 +97,9 @@ class BaseService
      * @param id    {String}    id主键
      * @return {Promise.<*>}
      */
-    async findById(id)
-    {
-        if( util.isNotEmptyString(id) )
-        {
-            return await this.model.findOne({"id":id}).exec();
+    async findById(id) {
+        if (util.isNotEmptyString(id)) {
+            return await this.model.findOne({"id": id}).exec();
         }
         return null;
     }

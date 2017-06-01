@@ -28,6 +28,14 @@ h2 {font-size:18px;font-weight:bold;margin:0;margin-bottom:15px;}
 #toolSearch{padding-top:8px;font-size:14px;font-family:'微软雅黑';display:none;}
 #queryform{margin-left:10px;}
 
+/* 用于表格布局 */
+.trLeft{
+	text-align: right;
+}
+.trRight{
+	text-align: left;
+}
+
 /* 用于指定table中填单元素的宽度 */
 .width-10{
 	width:10%;
@@ -35,14 +43,23 @@ h2 {font-size:18px;font-weight:bold;margin:0;margin-bottom:15px;}
 .width-15{
 	width:15%;
 }
+.width-20{
+	width:20%;
+}
 .width-23{
 	width:23%;
+}
+.width-30{
+	width:30%;
 }
 .width-33{
 	width:33%;
 }
 .width-35{
 	width:35%;
+}
+.width-40{
+	width:40%;
 }
 .width-50{
 	width:50%;
@@ -53,6 +70,18 @@ h2 {font-size:18px;font-weight:bold;margin:0;margin-bottom:15px;}
 .width-66{
 	width:66%;
 }
+.width-70{
+	width:70%;
+}
 .width-75{
 	width:75%;
+}
+.width-80{
+	width:80%;
+}
+.width-85{
+	width:85%;
+}
+.width-90{
+	width:90%;
 }

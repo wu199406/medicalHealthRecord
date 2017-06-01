@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
     <head>
-        <% include ../relyOn.ejs %><!--设置meta和导入依赖-->
+        <% include relyOn.ejs %><!--设置meta和导入依赖-->
         <title>资源管理</title>
     </head>
 
@@ -29,7 +29,7 @@
              * 配置对象
              **/
             options:{
-                datagrid_url:	"/resource/selectPage",//数据表格的url
+                datagrid_url:	"/resource/selectPageOfTree",//数据表格的url
                 datagrid_query:	{status:""},//数据表格的额外的参数对象,默认的参数对象
                 addDialog_options: {href:"/resource/getAdd",title:"添加",width:"680",height:"280",modal: true,queryParams:{}},//添加表单的配置对象
                 editDialog_options: {href:"/resource/getEdit",title:"编辑",width:"680",height:"280",modal : true,queryParams:{}},//修改表单的配置对象
@@ -53,12 +53,13 @@
                     url : this.options.datagrid_url,
                     queryParams: this.options.datagrid_query,
                     idField : 'id',
+                    treeField:'name',
                     fit : true,
                     fitColumns : true,
                     border : false,
                     pagination : true,
                     rownumbers : true,
-                    pageSize : 20,
+                    pageSize : 100,
                     pageList : [ 10, 20, 30, 40, 50, 100, 200, 300, 400, 500 ],
                     singleSelect: false,//只能选择一行
                     frozenColumns : [ [ {
@@ -71,9 +72,20 @@
                     onLoadSuccess:function(data){
                         $('.organization-easyui-linkbutton-edit').linkbutton({text:'维护',plain:true,iconCls:'icon-edit'});
                         $('.organization-easyui-linkbutton-del').linkbutton({text:'删除',plain:true,iconCls:'icon-del'});
-                        that.datagridObj.datagrid("fixRownumber");
+                        that.datagridObj.treegrid("fixRownumber");
                     },
                     toolbar : "#"+this.ids.toolbar_id,
+                    onBeforeLoad:function (row, param) {
+                        if(param && param.id)
+                        {
+                            if(row != undefined || row != null)
+                            {
+                                param.pid = param.id;
+                            }
+                            delete param.id;
+                        }
+                        return param;
+                    }
                 };
             },
             /**
@@ -81,8 +93,14 @@
              **/
             getDatagridColumns: function(){
                 return [ [
-                    {field : "name",title : "资源名称",width : '200'},
+                    {field : "name",title : "资源名称",width : '100'},
+                    {field : "type",title : "资源类型",width : '100'},
                     {field : "url",title : "资源路径",width : '100'},
+                    {field : "sort",title : "排序次序",width : '100'},
+                    {field : "icon",title : "资源图标",width : '100'},
+                    {field : "status",title : "资源状态",width : '100'},
+                    {field : "note",title : "资源说明",width : '200'},
+                    {field : "pid", title : "父节点",width : '0',hidden:true},
                     {field : "action",title : "操作",width : 150,
                         formatter : function(value, row, index) {
                             var str = '';
@@ -106,7 +124,7 @@
              * 对外接口,用于创建数据表格
              **/
             createDatagrid: function(){
-                this.datagridObj = $("#"+this.ids.datagrid_id).datagrid( $.extend( {} , this.getdatagridOptions() , this.extraDatagridOptions ) );
+                this.datagridObj = $("#"+this.ids.datagrid_id).treegrid( $.extend( {} , this.getdatagridOptions() , this.extraDatagridOptions ) );
                 $("#"+this.ids.toolbar_id).prepend($("#"+this.ids.toolSearch_id));
                 $("#"+this.ids.toolSearch_id).append("<hr>");
                 $("#"+this.ids.toolSearch_id).show();
@@ -129,7 +147,7 @@
                                 if( result.success == true )
                                 {
                                     $.messager.alert("信息",result.msg,"info");
-                                    that.datagridObj.datagrid('reload');//刷新数据表格
+                                    that.datagridObj.treegrid('reload');//刷新数据表格
                                     $.addDialog.dialog('close');//关闭面板
                                 }
                                 else
@@ -164,7 +182,7 @@
                     var that = this;
 
                     //使编辑的行被选择
-                    setTimeout(function(){that.datagridObj.datagrid("selectRecord",id);}, 0);
+                    setTimeout(function(){that.datagridObj.treegrid("selectRecord",id);}, 0);
 
                     $.extend(this.options.editDialog_options.queryParams,{id: id});
 
@@ -176,7 +194,7 @@
                                     if( result.success == true )
                                     {
                                         $.messager.alert("信息",result.msg,"info");
-                                        that.datagridObj.datagrid('reload');//刷新数据表格
+                                        that.datagridObj.treegrid('reload');//刷新数据表格
                                         $.dialogEdit.dialog('close');//关闭面板
                                     }
                                     else
@@ -212,7 +230,7 @@
                 else//是行外删除
                 {
                     //获取勾选的行的id
-                    var rows = this.datagridObj.datagrid('getChecked');
+                    var rows = this.datagridObj.treegrid('getChecked');
                     for(var i=0;i < rows.length;i++)
                     {
                         idArray.push( rows[i].id );
@@ -231,7 +249,7 @@
                                 if(data.success)//插入成功
                                 {
                                     //更新数据表格
-                                    that.datagridObj.datagrid('reload');
+                                    that.datagridObj.treegrid('reload');
                                 }
                                 else//插入失败
                                 {
@@ -239,12 +257,12 @@
                                 }
                             },'json');
 
-                            that.datagridObj.datagrid('unselectAll').datagrid('uncheckAll'); //使所有的行均不被选择和勾选
+                            that.datagridObj.treegrid('unselectAll').treegrid('uncheckAll'); //使所有的行均不被选择和勾选
                             progressClose();
                         }
                         else
                         {
-                            that.datagridObj.datagrid('unselectAll').datagrid('uncheckAll');
+                            that.datagridObj.treegrid('unselectAll').treegrid('uncheckAll');
                         }
                     });
                 }
@@ -263,7 +281,7 @@
                 $.extend( this.curentQueryParam ,  queryObject , this.options.datagrid_query );
 
                 //使用表单的序列化数据，作为数据表格的reload方法请求参数
-                this.datagridObj.datagrid('reload', this.curentQueryParam );
+                this.datagridObj.treegrid('reload', this.curentQueryParam );
             },
             /**
              * 对外接口,重置搜索栏和数据表格
@@ -273,7 +291,7 @@
 
                 this.curentQueryParam = this.options.datagrid_query;
 
-                this.datagridObj.datagrid('reload', this.curentQueryParam);
+                this.datagridObj.treegrid('reload', this.curentQueryParam);
             },
             /**
              * 对外接口,引入外部数据表格的搜索参数对象
@@ -282,7 +300,7 @@
             queryByExternal: function(param){
 
                 //使用表单的序列化数据，作为数据表格的reload方法请求参数
-                this.datagridObj.datagrid('reload', $.extend(this.curentQueryParam , param) );
+                this.datagridObj.treegrid('reload', $.extend(this.curentQueryParam , param) );
             },
             /**
              * 对外接口,用于设置将要生成的datagrid的配置
