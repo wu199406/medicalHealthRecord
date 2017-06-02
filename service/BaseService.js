@@ -3,7 +3,7 @@
  * Created by wu199406 on 2017/5/13.
  */
 
-let modelUtile = require("../util/ModelUtil");
+let modelUtil = require("../util/ModelUtil");
 let util = require("../util/Util");
 
 class BaseService
@@ -35,23 +35,16 @@ class BaseService
      */
     async editById(entity)
     {
-        try
+        if( !entity.id )
         {
-            if( !entity.id )
-            {
-                return {flat:false,message:"更新时id主键不能为空"};
-            }
-
-            let updateObj = modelUtile.getPropertyNotNullObject(entity);
-
-            let result = await this.model.update({id:entity.id},{$set:updateObj});
-
-            return result;
+            throw new Error("更新时id主键不能为空");
         }
-        catch (err)
-        {
-            return err;
-        }
+
+        util.setEmptyStrToNullOfObj(entity);//将更新对象中的空字符串设置为null
+
+        let result = await this.model.update({id:entity.id},{$set:entity});
+
+        return result;
     }
 
     /**
@@ -84,7 +77,7 @@ class BaseService
         page = Number(page);
         row = Number(row);
 
-        query = modelUtile.getPropertyNotNullObject(query);
+        query = modelUtil.getPropertyNotNullObject(query);
         let [rows,total] = await Promise.all([
             this.model.find().where(query).sort({id:1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
@@ -98,10 +91,14 @@ class BaseService
      * @return {Promise.<*>}
      */
     async findById(id) {
-        if (util.isNotEmptyString(id)) {
+        if (util.isNotEmptyString(id))
+        {
             return await this.model.findOne({"id": id}).exec();
         }
-        return null;
+        else
+        {
+            throw new Error("id主键不能为空");
+        }
     }
 }
 

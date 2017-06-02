@@ -1,4 +1,5 @@
 /**
+ * 主要用于处理请求参数
  * Created by wu199406 on 2017/5/26.
  */
 
@@ -10,7 +11,7 @@ let Util = require("../util/Util");
 class QueryParamUtil
 {
     /**
-     * 将expresss的请求参数抽出出来并返回
+     * 将Expresss的请求参数抽出出来并返回
      * @param req   {Express.Request}   请求参数对象
      * @return {{}} 返回请求参数对象
      */
@@ -19,56 +20,64 @@ class QueryParamUtil
         let getParams = req.query;
         let postParams = req.body;
 
-        let newObj = {};
+        let query = {};
 
         Reflect.ownKeys(getParams).forEach(function (value, index, array) {
-            if(Util.isNotEmptyString(getParams[value]))
-            {
-                Reflect.set(newObj, value, getParams[value]);
-            }
+            Reflect.set(query, value, getParams[value]);
         });
         Reflect.ownKeys(postParams).forEach(function (value, index, array) {
-            if(Util.isNotEmptyString(postParams[value]))
-            {
-                Reflect.set(newObj, value, postParams[value]);
-            }
+            Reflect.set(query, value, postParams[value]);
         });
 
-        return newObj;
+        return query;
+    }
+
+    /**
+     * 将expresss的请求参数抽出出来并返回
+     * @param req   {Express.Request}   请求参数对象
+     * @param flat  {boolean}   true,会返回空的属性(包括null和空字符串);false,不会返回空的属性。默认为true。
+     * @return {{}}
+     */
+    static getQueryParamsMayHasEmpty(req,flat=true)
+    {
+        let query = QueryParamUtil.getQueryParams(req);
+
+        if(flat == false)
+        {
+            Util.getNotNUllParams(query);
+        }
+        return query;
     }
 
     /**
      * 根据属性名数组将expresss的请求参数抽出出来并返回
      * @param req   {Express.Request}   请求参数对象
      * @param fields    {Array} 属性名数组
+     * @param flat  {boolean}   true,会返回空的属性(包括null和空字符串);false,不会返回空的属性。默认为true。
      * @return {{}} 返回相应的请求参数对象
      */
-    static getQueryParamsOfFields(req,fields)
+    static getQueryParamsOfFields(req,fields,flat=true)
     {
         if(!fields && !Array.isArray(fields))
         {
             throw new Error("第二个参数fields必须数组对象");
         }
 
-        let getParams = req.query;
-        let postParams = req.body;
+        let query = QueryParamUtil.getQueryParams(req);
 
-        let newObj = {};
-
-        Reflect.ownKeys(getParams).forEach(function (value, index, array) {
-            if(fields.includes(value) && Util.isNotEmptyString(getParams[value]))
+        Reflect.ownKeys(query).forEach(function (value, index, array) {
+            if(!fields.includes(value))
             {
-                Reflect.set(newObj, value, getParams[value]);
-            }
-        });
-        Reflect.ownKeys(postParams).forEach(function (value, index, array) {
-            if(fields.includes(value) && Util.isNotEmptyString(postParams[value]))
-            {
-                Reflect.set(newObj, value, postParams[value]);
+                Reflect.deleteProperty(query, value);
             }
         });
 
-        return newObj;
+        if(flat == false)
+        {
+            Util.getNotNUllParams(query);
+        }
+
+        return query;
     }
 
     /**
@@ -76,36 +85,35 @@ class QueryParamUtil
      *
      * @param req   {Express.Request}   请求参数对象
      * @param fields    {Array} 属性名数组
+     * @param flat  {boolean}   true,会返回空的属性(包括null和空字符串);false,不会返回空的属性。默认为true。
      * @return {{'query': {}, 'pageQuery': {}}} query中不含有fields属性数组中的属性,而pageQuery中只含有fields属性数组中的属性
      */
-    static getQueryParamsNotFields(req,fields)
+    static getQueryParamsPartFields(req,fields,flat=true)
     {
-        let getParams = req.query;
-        let postParams = req.body;
-
         let newObj = {};
         let fieldsObj = {};
 
-        Reflect.ownKeys(getParams).forEach(function (value, index, array) {
-            if(Util.isNotEmptyString(getParams[value])) {
+        if(!fields && !Array.isArray(fields))
+        {
+            throw new Error("第二个参数fields必须数组对象");
+        }
+
+        let query = QueryParamUtil.getQueryParams(req);
+
+        Reflect.ownKeys(query).forEach(function (value, index, array) {
                 if (fields.includes(value)) {
-                    Reflect.set(fieldsObj, value, getParams[value]);
+                    Reflect.set(fieldsObj, value, query[value]);
                 }
                 else {
-                    Reflect.set(newObj, value, getParams[value]);
+                    Reflect.set(newObj, value, query[value]);
                 }
-            }
         });
-        Reflect.ownKeys(postParams).forEach(function (value, index, array) {
-            if(Util.isNotEmptyString(postParams[value])) {
-                if (fields.includes(value)) {
-                    Reflect.set(fieldsObj, value, postParams[value]);
-                }
-                else {
-                    Reflect.set(newObj, value, postParams[value]);
-                }
-            }
-        });
+
+        if(flat == false)
+        {
+            Util.getNotNUllParams(newObj);
+            Util.getNotNUllParams(fieldsObj);
+        }
 
         return {'query':newObj,'pageQuery':fieldsObj};
     }

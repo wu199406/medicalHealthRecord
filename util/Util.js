@@ -36,6 +36,56 @@ class util{
             return false;
         }
     }
+
+    /**
+     * 如果参数obj是undefined、null、空字符串或者由多个空字符串组成的字符串时，返回true；否则返回false。
+     * @param obj
+     * @return {boolean}
+     */
+    static isEmpty(obj)
+    {
+        if(obj == undefined || obj == null)
+        {
+            return true;
+        }
+        else if( util.isString(obj) && obj.trim() == "" )
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 删除参数对象中的为空的属性，会影响参数对象
+     * @param obj
+     * @return {*}
+     */
+    static getNotNUllParams(obj)
+    {
+        Reflect.ownKeys(obj).forEach(function (value, index, array) {
+            if(util.isEmpty(obj[value]))
+            {
+                Reflect.deleteProperty(obj,value);
+            }
+        });
+        return obj;
+    }
+
+    /**
+     * 将对象中的空字符串设置为null
+     * @param obj   {Object}    js纯净对象
+     * @return {*}
+     */
+    static setEmptyStrToNullOfObj(obj)
+    {
+        Reflect.ownKeys(obj).forEach(function (value, index, array) {
+            if(util.isString(obj[value]) && obj[value].trim() == "")
+            {
+                obj[value] = null;
+            }
+        });
+        return obj;
+    }
 }
 
 module.exports = util;

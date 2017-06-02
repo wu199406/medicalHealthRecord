@@ -3,7 +3,6 @@
  * Created by wu199406 on 2017/5/27.
  */
 
-let ModelUtile = require("../util/ModelUtil");
 let Util = require("../util/Util");
 let MongooseModelUtil = require('../Util/MongooseModelUtil');
 let Tree = require("../vo/Tree");
@@ -18,8 +17,8 @@ class BaseTreeService extends BaseService
     }
 
     /**
-     * 以树的方式历遍集合
-     * @param pid
+     * 以树的方式历遍集合，并返回树型的数据
+     * @param pid   父节点的id
      * @return {Promise.<Array>}
      */
     async findOfTree(pid)
@@ -59,6 +58,13 @@ class BaseTreeService extends BaseService
         return childrenTrees;
     }
 
+    /**
+     * 用于树表格的获取分页数据和节点的孩子节点数组
+     * @param page
+     * @param row
+     * @param query 如何该参数有非空的pid，表示获取指定节点的孩子节点数组；否则表示获取顶层节点的分页数据
+     * @return {Promise.<*>}
+     */
     async findByPageOfTree(page,row,query)
     {
         page = Number(page);
@@ -87,12 +93,17 @@ class BaseTreeService extends BaseService
         }
     }
 
+    /**
+     * 判断list中的节点是有有子节点，有就为节点添加值为"closed"的属性state；没有添加值为"open"的属性state。
+     * @param list
+     * @return {Promise.<Array|*>}  返回转换修改后的节点数组
+     */
     async setTreegridNodes(list)
     {
         let results = new Array();
         let promises = new Array();
 
-        list = MongooseModelUtil.toObjectByArray(list);
+        list = MongooseModelUtil.toObjectByArray(list);//将数组中的document转换为纯净的js对象
 
         for(let node of list)
         {
@@ -107,7 +118,6 @@ class BaseTreeService extends BaseService
             if(results[i] > 0)
             {
                 list[i].state = "closed";
-                list[i].children = [];
             }
             else
             {
