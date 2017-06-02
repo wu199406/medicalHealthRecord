@@ -5,24 +5,17 @@ let mongoose = require("mongoose");
 
 const roleModel = mongoose.model("role");
 
-class roleService{
-    constructor(){}
+let BaseService = require("../service/BaseService");
 
-    static async addRole(role,callback)
+class RoleService extends BaseService
+{
+    constructor()
     {
-        try
-        {
-           let result = await roleModel.create(role);
-
-            console.log("添加新角色成功");
-            console.log(result);
-        }
-        catch (err)
-        {
-            console.log("添加新角色失败");
-            return err;
-        }
+        super(roleModel);
     }
+
+
+
 }
 
-module.exports = roleService;
+module.exports = RoleService;

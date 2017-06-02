@@ -2,7 +2,7 @@
  * Created by wu199406 on 2017/5/26.
  */
 
-let Result = require("../util/Result");
+let Result = require("../vo/Result");
 
 /**
  * 用于简化Express框架下返回操作结果的工具类

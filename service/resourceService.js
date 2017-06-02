@@ -2,10 +2,10 @@
  * Created by wu199406 on 2017/5/13.
  */
 
-let BaseTreeService = require("../service/BaseTreeService");
 let mongoose = require("mongoose");
 let resourceModel = mongoose.model("resource");
 
+let BaseTreeService = require("../service/BaseTreeService");
 
 class resourceService extends BaseTreeService
 {
@@ -13,6 +13,8 @@ class resourceService extends BaseTreeService
     {
         super(resourceModel);
     }
+
+    
 }
 
 module.exports = resourceService;

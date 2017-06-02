@@ -3,6 +3,7 @@ let path = require('path');
 let favicon = require('serve-favicon');
 let logger = require('morgan');
 let cookieParser = require('cookie-parser');//提供从请求读取cookie和在相应中设置cookie的功能
+let session = require("express-session");//提供session功能
 let bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
 
 //引入数据库接口，启动mongodb数据库
@@ -25,7 +26,13 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser("session"));
+app.use(session({
+    secret: 'session',//与cookieParser中的一致
+    resave: true,
+    saveUninitialized:true
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));//管理静态文件
 
 app.use('/', index);

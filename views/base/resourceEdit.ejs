@@ -4,6 +4,7 @@
         console.log($('#parentResource')[0]);
         $('#parentResource').combotree({
             url:'/resource/getTree',
+            queryParams:{id:"<%=entity.id%>"},
             panelHeight:'auto',
             panelMaxHeight:200,
             editable:false,

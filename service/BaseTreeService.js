@@ -11,6 +11,11 @@ let BaseService = require('../service/BaseService');
 
 class BaseTreeService extends BaseService
 {
+    /**
+     * 通用的提供tree的服务
+     * @param model
+     * @extends BaseService
+     */
     constructor(model)
     {
         super(model);
@@ -18,10 +23,11 @@ class BaseTreeService extends BaseService
 
     /**
      * 以树的方式历遍集合，并返回树型的数据
-     * @param pid   父节点的id
+     * @param {Object} pid  父节点的id
+     * @param {Array}   [excludeId]     排除的节点的id主键数组，可选的，默认为空数组
      * @return {Promise.<Array>}
      */
-    async findOfTree(pid)
+    async findOfTree(pid,excludeId = [])
     {
         let that = this;
 
@@ -31,11 +37,13 @@ class BaseTreeService extends BaseService
 
         if(Util.isNotEmptyString(pid))//如果父节点为非空字符串,就获取并历遍其子节点,并返回子节点数组
         {
-            list = await this.model.find({"pid":pid}).exec();//获取子节点数组
+            //list = await this.model.find({"pid":pid}).exec();//获取子节点数组
+            list = await this.model.find().and([{"pid":pid},{ id: { $nin: excludeId} }]).exec();//获取子节点数组
         }
         else
         {
-            list = await this.model.$where('this.pid == null || this.pid == undefined').exec();//获取子节点数组
+            //list = await this.model.$where('this.pid == null || this.pid == undefined').exec();//获取子节点数组
+            list = await this.model.find().and([{"pid":null},{ id: { $nin: excludeId} }]).exec();
         }
 
         if( list && Array.isArray(list) )
@@ -50,7 +58,7 @@ class BaseTreeService extends BaseService
                 tree.state = value.status;
                 tree.checked = false;
 
-                tree.children = await that.findOfTree(tree.id);//递归
+                tree.children = await that.findOfTree(tree.id,excludeId);//递归
 
                 childrenTrees.push(tree);
             }

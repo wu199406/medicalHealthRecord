@@ -8,7 +8,7 @@ let router = express.Router();
 //导入工具类
 let QueryParamUtil = require("../util/QueryParamUtil");
 let ResponseUtil = require("../util/ResponseUtil");
-let PageUtil = require("../util/PageUtil");
+let PageUtil = require("../vo/PageUtil");
 
 let resourceServiceClass = require("../service/resourceService");//获取服务类
 let resourceService = new resourceServiceClass();//创建服务实例
@@ -32,7 +32,7 @@ router.get("/getEdit",async function(req, res, next){
     catch(e)
     {
         console.log(e);
-        res.send(JSON.stringify(err));
+        res.send(JSON.stringify(e));
         res.end();
     }
 });
@@ -71,7 +71,7 @@ router.post("/insert",async function(req, res, next){
     }
 });
 
-router.all("/update",async function(req, res, next){
+router.post("/update",async function(req, res, next){
     try
     {
         //获取请求的内容对象
@@ -88,7 +88,7 @@ router.all("/update",async function(req, res, next){
     }
 });
 
-router.all("/delete",async function(req, res, next){
+router.post("/delete",async function(req, res, next){
     try {
         //获取请求的内容对象
         let queryParam = await QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
@@ -109,7 +109,7 @@ router.post("/getTree",async function(req, res, next){
         //获取请求的内容对象
         let query = QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = await resourceService.findOfTree(query);
+        let result = await resourceService.findOfTree(query,[query.id]);
 
         res.send(result);
     }

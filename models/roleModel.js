@@ -10,9 +10,9 @@ let mongoose = require("mongoose");//引用mongoose模块
 let Schema = mongoose.Schema;
 
 let roleSchema = new Schema({
-    name:String,
+    name:{type:String,default:null},
     createTime:{type: Date,default:Date.now()},//创建时间
-    resources:[{type:Schema.Types.ObjectId,ref:"resource"}]
+    resources:[{type:Schema.Types.ObjectId,ref:"resource"}]//角色拥有的资源，即角色的权限
 });
 
 //添加静态方法
