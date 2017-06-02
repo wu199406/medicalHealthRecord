@@ -123,7 +123,7 @@ class BaseTreeService extends BaseService
 
         for(let i=0;i<results.length;i++)
         {
-            if(results[i] > 0)
+            if( results[i] && results[i] > 0)
             {
                 list[i].state = "closed";
             }
