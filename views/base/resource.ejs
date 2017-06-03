@@ -358,33 +358,31 @@
     </script>
 
     <body>
+        <!-- start 数据表格内容 -->
         <div class="easyui-layout" data-options="fit:true,border:false">
-            <!-- start 数据表格内容 -->
-            <div class="easyui-layout" data-options="fit:true,border:false">
-                <!-- 数据检索 -->
-                <div id="toolSearch">
-                    <form id="queryform">
-                        <!-- <label for="materialName">原料名称:</label><input class="easyui-textbox" name="materialName" style="width:160px;height:25px;"> -->
+            <!-- 数据检索 -->
+            <div id="toolSearch">
+                <form id="queryform">
+                    <!-- <label for="materialName">原料名称:</label><input class="easyui-textbox" name="materialName" style="width:160px;height:25px;"> -->
 
-                        <a onclick="resource.queryData();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
-                        <a onclick="resource.resetForm();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-refresh'">重置</a>
-                    </form>
-                </div>
-                <!-- 数据列表 -->
-                <div data-options="region:'center',border:false"  style="overflow: hidden;">
-                    <table id="datagrid"></table>
-                </div>
-
-                <!-- 工具栏 -->
-                <div id="toolbar" style="display: none;">
-                    <a onclick="resource.createAddDialog();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">登记</a>
-                     <a onclick="resource.deleteFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">批量删除</a>
-                    <!-- <a onclick="inputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-undo'">数据导入</a>
-                    <a onclick="outputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-redo'">数据导出</a>
-                    <a onclick="moban();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-down'">模版下载</a> -->
-                </div>
+                    <a onclick="resource.queryData();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
+                    <a onclick="resource.resetForm();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-refresh'">重置</a>
+                </form>
             </div>
-            <!-- end 数据表格内容 -->
+            <!-- 数据列表 -->
+            <div data-options="region:'center',border:false"  style="overflow: hidden;">
+                <table id="datagrid"></table>
+            </div>
+
+            <!-- 工具栏 -->
+            <div id="toolbar" style="display: none;">
+                <a onclick="resource.createAddDialog();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">登记</a>
+                 <a onclick="resource.deleteFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">批量删除</a>
+                <!-- <a onclick="inputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-undo'">数据导入</a>
+                <a onclick="outputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-redo'">数据导出</a>
+                <a onclick="moban();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-down'">模版下载</a> -->
+            </div>
         </div>
+        <!-- end 数据表格内容 -->
     </body>
 </html>

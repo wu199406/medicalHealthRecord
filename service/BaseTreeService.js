@@ -22,6 +22,33 @@ class BaseTreeService extends BaseService
     }
 
     /**
+     * 覆盖BaseService的deleteById方法
+     * 当删除一个树节点时，会递归删除其子孙节点
+     * @param {String|Array} id 文档的id或者id数组
+     * @return {Promise.<void>}
+     */
+    async deleteById(id)
+    {
+        await super.deleteById(id);//调用父类方法删除文档
+
+        if(Array.isArray(id))
+        {
+            for(let element of id)
+            {
+                let childrens = await this.model.find({pid:element}).select('id').exec();
+                childrens = MongooseModelUtil.toObjectByArray(childrens);//将数组中的document转换为纯净的js对象
+                let newchildrens = childrens.map(function (value) {
+                    if(value && value.id)
+                    {
+                        return value.id;
+                    }
+                });
+                await this.deleteById(newchildrens);//递归删除子节点
+            }
+        }
+    }
+
+    /**
      * 以树的方式历遍集合，并返回树型的数据
      * @param {Object} pid  父节点的id
      * @param {Array}   [excludeId]     排除的节点的id主键数组，可选的，默认为空数组
@@ -105,6 +132,7 @@ class BaseTreeService extends BaseService
 
     /**
      * 判断list中的节点是有有子节点，有就为节点添加值为"closed"的属性state；没有添加值为"open"的属性state。
+     * @private 私有方法
      * @param list
      * @return {Promise.<Array|*>}  返回转换修改后的节点数组
      */
