@@ -109,7 +109,7 @@ router.post("/getTree",async function(req, res, next){
         //获取请求的内容对象
         let query = QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = await resourceService.findOfTree(query,[query.id]);
+        let result = await resourceService.findOfTree(query,[query.id],"sort");
 
         res.send(result);
     }
@@ -127,7 +127,7 @@ router.post("/selectPageOfTree",async function(req, res, next){
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
 
-        let result = await resourceService.findByPageOfTree(pageQuery.page,pageQuery.rows,query);
+        let result = await resourceService.findByPageOfTree(pageQuery.page,pageQuery.rows,query,"sort");
         res.send(result);
     }
     catch (e)

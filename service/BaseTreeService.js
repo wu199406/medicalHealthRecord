@@ -25,9 +25,10 @@ class BaseTreeService extends BaseService
      * 以树的方式历遍集合，并返回树型的数据
      * @param {Object} pid  父节点的id
      * @param {Array}   [excludeId]     排除的节点的id主键数组，可选的，默认为空数组
+     * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<Array>}
      */
-    async findOfTree(pid,excludeId = [])
+    async findOfTree(pid,excludeId = [],sortField="id")
     {
         let that = this;
 
@@ -38,12 +39,12 @@ class BaseTreeService extends BaseService
         if(Util.isNotEmptyString(pid))//如果父节点为非空字符串,就获取并历遍其子节点,并返回子节点数组
         {
             //list = await this.model.find({"pid":pid}).exec();//获取子节点数组
-            list = await this.model.find().and([{"pid":pid},{ id: { $nin: excludeId} }]).exec();//获取子节点数组
+            list = await this.model.find().and([{"pid":pid},{ id: { $nin: excludeId} }]).sort({[sortField]:1}).exec();//获取子节点数组
         }
         else
         {
             //list = await this.model.$where('this.pid == null || this.pid == undefined').exec();//获取子节点数组
-            list = await this.model.find().and([{"pid":null},{ id: { $nin: excludeId} }]).exec();
+            list = await this.model.find().and([{"pid":null},{ id: { $nin: excludeId} }]).sort({[sortField]:1}).exec();
         }
 
         if( list && Array.isArray(list) )
@@ -71,9 +72,10 @@ class BaseTreeService extends BaseService
      * @param page
      * @param row
      * @param query 如何该参数有非空的pid，表示获取指定节点的孩子节点数组；否则表示获取顶层节点的分页数据
+     * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<*>}
      */
-    async findByPageOfTree(page,row,query)
+    async findByPageOfTree(page,row,query,sortField="id")
     {
         page = Number(page);
         row = Number(row);
@@ -82,7 +84,7 @@ class BaseTreeService extends BaseService
         if(Util.isNotEmptyString(query.pid))
         {
             [rows,total] = await Promise.all([
-                this.model.find().where(query).sort({id:1}).limit(row).skip((page-1)*row).exec(),
+                this.model.find().where(query).sort({[sortField]:1}).limit(row).skip((page-1)*row).exec(),
                 this.model.count(query).exec()
             ]);
 
@@ -92,7 +94,7 @@ class BaseTreeService extends BaseService
         else
         {
             [rows,total] = await Promise.all([
-                this.model.find().where(query).where("pid",null).sort({id:1}).limit(row).skip((page-1)*row).exec(),
+                this.model.find().where(query).where("pid",null).sort({[sortField]:1}).limit(row).skip((page-1)*row).exec(),
                 this.model.count(query).where("pid",null).exec()
             ]);
 

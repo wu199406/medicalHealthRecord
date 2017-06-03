@@ -70,16 +70,17 @@ class BaseService
      * @param page  页码
      * @param row   分页大小
      * @param query 查询条件对象
+     * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<{list, size}>}
      */
-    async findByPage(page,row,query)
+    async findByPage(page,row,query,sortField="id")
     {
         page = Number(page);
         row = Number(row);
 
         query = modelUtil.getPropertyNotNullObject(query);
         let [rows,total] = await Promise.all([
-            this.model.find().where(query).sort({id:1}).limit(row).skip((page-1)*row).exec(),
+            this.model.find().where(query).sort({[sortField]:1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
         ]);
         return {rows ,total};

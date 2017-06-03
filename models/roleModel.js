@@ -11,6 +11,9 @@ let Schema = mongoose.Schema;
 
 let roleSchema = new Schema({
     name:{type:String,default:null},
+    sort:{type:Number,default:0},//排序次序
+    status:{type:String,default:null},//状态
+    note:{type:String,default:null},//资源说明
     createTime:{type: Date,default:Date.now()},//创建时间
     resources:[{type:Schema.Types.ObjectId,ref:"resource"}]//角色拥有的资源，即角色的权限
 });

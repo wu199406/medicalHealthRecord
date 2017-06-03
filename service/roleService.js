@@ -14,7 +14,7 @@ class RoleService extends BaseService
         super(roleModel);
     }
 
-
+    
 
 }
 
