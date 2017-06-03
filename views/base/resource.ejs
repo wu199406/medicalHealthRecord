@@ -10,6 +10,17 @@
         /* start 页面核心的初始化参数 */
 
         $(function(){
+            resource.extraDatagridOptions.onBeforeLoad = function (row, param) {
+                if(param && param.id)
+                {
+                    if(row != undefined || row != null)
+                    {
+                        param.pid = param.id;
+                    }
+                    delete param.id;
+                }
+                return param;
+            };
             //创建数据表格
             resource.createDatagrid();
         });
@@ -74,18 +85,7 @@
                         $('.organization-easyui-linkbutton-del').linkbutton({text:'删除',plain:true,iconCls:'icon-del'});
                         that.datagridObj.treegrid("fixRownumber");
                     },
-                    toolbar : "#"+this.ids.toolbar_id,
-                    onBeforeLoad:function (row, param) {
-                        if(param && param.id)
-                        {
-                            if(row != undefined || row != null)
-                            {
-                                param.pid = param.id;
-                            }
-                            delete param.id;
-                        }
-                        return param;
-                    }
+                    toolbar : "#"+this.ids.toolbar_id
                 };
             },
             /**

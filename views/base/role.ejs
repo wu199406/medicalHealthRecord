@@ -12,11 +12,11 @@
 
     $(function(){
         //创建数据表格
-        resource.createDatagrid();
+        role.createDatagrid();
     });
 
     //相关信息的对象
-    var resource = {
+    var role = {
         /**
          * 设置到的html元素的id
          **/
@@ -30,11 +30,11 @@
          * 配置对象
          **/
         options:{
-            datagrid_url:	"/resource/selectPage",//数据表格的url
+            datagrid_url:	"/role/selectPage",//数据表格的url
             datagrid_query:	{status:""},//数据表格的额外的参数对象,默认的参数对象
-            addDialog_options: {href:"/resource/getAdd",title:"添加",width:"680",height:"280",modal: true,queryParams:{}},//添加表单的配置对象
-            editDialog_options: {href:"/resource/getEdit",title:"编辑",width:"680",height:"280",modal : true,queryParams:{}},//修改表单的配置对象
-            delete_url: "/resource/delete"//删除路径
+            addDialog_options: {href:"/role/getAdd",title:"添加",width:"680",height:"280",modal: true,queryParams:{}},//添加表单的配置对象
+            editDialog_options: {href:"/role/getEdit",title:"编辑",width:"680",height:"280",modal : true,queryParams:{}},//修改表单的配置对象
+            delete_url: "/role/delete"//删除路径
         },
         /**
          * 数据表格对象
@@ -82,19 +82,16 @@
          **/
         getDatagridColumns: function(){
             return [ [
-                {field : "name",title : "资源名称",width : '100'},
-                {field : "type",title : "资源类型",width : '100'},
-                {field : "url",title : "资源路径",width : '100'},
+                {field : "name",title : "角色名称",width : '200'},
                 {field : "sort",title : "排序次序",width : '100'},
-                {field : "icon",title : "资源图标",width : '100'},
-                {field : "status",title : "资源状态",width : '100'},
-                {field : "note",title : "资源说明",width : '200'},
+                {field : "status",title : "角色状态",width : '100'},
+                {field : "note",title : "角色说明",width : '300'},
                 {field : "action",title : "操作",width : 150,
                     formatter : function(value, row, index) {
                         var str = '';
-                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-edit" data-options="plain:true,iconCls:\'icon-edit\'" onclick="resource.createEditDialog(\'{0}\');" >维护</a>', row.id);
+                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-edit" data-options="plain:true,iconCls:\'icon-edit\'" onclick="role.createEditDialog(\'{0}\');" >维护</a>', row.id);
                         str += '&nbsp;&nbsp;|&nbsp;&nbsp;';
-                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-del" data-options="plain:true,iconCls:\'icon-del\'" onclick="resource.deleteFun(\'{0}\');" >删除</a>', row.id);
+                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-del" data-options="plain:true,iconCls:\'icon-del\'" onclick="role.deleteFun(\'{0}\');" >删除</a>', row.id);
                         return str;
                     }
                 }
@@ -354,8 +351,8 @@
             <form id="queryform">
                 <!-- <label for="materialName">原料名称:</label><input class="easyui-textbox" name="materialName" style="width:160px;height:25px;"> -->
 
-                <a onclick="resource.queryData();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
-                <a onclick="resource.resetForm();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-refresh'">重置</a>
+                <a onclick="role.queryData();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">搜索</a>
+                <a onclick="role.resetForm();" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-refresh'">重置</a>
             </form>
         </div>
         <!-- 数据列表 -->
@@ -365,8 +362,8 @@
 
         <!-- 工具栏 -->
         <div id="toolbar" style="display: none;">
-            <a onclick="resource.createAddDialog();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">登记</a>
-            <a onclick="resource.deleteFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">批量删除</a>
+            <a onclick="role.createAddDialog();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-add'">登记</a>
+            <a onclick="role.deleteFun();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-cancel'">批量删除</a>
             <!-- <a onclick="inputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-undo'">数据导入</a>
             <a onclick="outputExcel();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-redo'">数据导出</a>
             <a onclick="moban();" href="javascript:void(0);" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon-down'">模版下载</a> -->

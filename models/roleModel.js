@@ -10,6 +10,7 @@ let mongoose = require("mongoose");//引用mongoose模块
 let Schema = mongoose.Schema;
 
 let roleSchema = new Schema({
+    id:{type:Schema.Types.ObjectId,default:mongoose.Types.ObjectId,required:true,unique:true},
     name:{type:String,default:null},
     sort:{type:Number,default:0},//排序次序
     status:{type:String,default:null},//状态

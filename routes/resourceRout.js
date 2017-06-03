@@ -42,7 +42,7 @@ router.post("/selectPage",async function(req, res, next){
     {
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
-        let result = await resourceService.findByPage(query.page,query.rows,pageQuery);
+        let result = await resourceService.findByPage(pageQuery.page,pageQuery.rows,query,'sort');
 
         res.send(result);
     }
