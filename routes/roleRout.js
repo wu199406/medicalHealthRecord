@@ -15,7 +15,6 @@ let roleService = new RoleService();//创建服务实例
 router.get("/index",function(req, res, next){
     res.render('base/role', {});
 });
-
 router.get("/getAdd",function(req, res, next){
     res.render('base/roleAdd', {});
 });
@@ -35,6 +34,25 @@ router.get("/getEdit",async function(req, res, next){
         res.end();
     }
 });
+
+/*获取角色授权页面*/
+router.get("/getRoleGrant",async function(req, res, next){
+    try
+    {
+        let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
+
+        let result = await roleService.findById(queryParam.id);
+        console.log(result.get("resources"));
+        res.render('base/roleGrant', {id:result.get('id'),grant:result.toObject().resources});
+    }
+    catch(e)
+    {
+        console.log(e);
+        res.send(JSON.stringify(e));
+        res.end();
+    }
+});
+
 
 router.post("/selectPage",async function(req, res, next){
     try
@@ -100,6 +118,23 @@ router.post("/delete",async function(req, res, next){
     {
         console.log(e);
         ResponseUtil.returnResponseErr(res,"删除失败",e);
+    }
+});
+
+router.post("/grant",async function(req, res, next){
+    try
+    {
+        //获取请求的内容对象
+        let queryParam = await QueryParamUtil.getQueryParamsOfFields(req,['id','nodeIds'])
+
+        await roleService.roleGrant(queryParam.id,JSON.parse(queryParam.nodeIds));
+
+        ResponseUtil.returnResponseSuccess(res,"授权成功");
+    }
+    catch(e)
+    {
+        console.log(e);
+        ResponseUtil.returnResponseErr(res,"授权失败",e);
     }
 });
 

@@ -34,6 +34,7 @@
             datagrid_query:	{status:""},//数据表格的额外的参数对象,默认的参数对象
             addDialog_options: {href:"/role/getAdd",title:"添加",width:"680",height:"200",modal: true,queryParams:{}},//添加表单的配置对象
             editDialog_options: {href:"/role/getEdit",title:"编辑",width:"680",height:"200",modal : true,queryParams:{}},//修改表单的配置对象
+            grantDialog_options: {href:"/role/getRoleGrant",title:"授权",width:"250",height:"500",modal : true,queryParams:{}},//授权窗口的配置对象
             delete_url: "/role/delete"//删除路径
         },
         /**
@@ -72,6 +73,7 @@
                 onLoadSuccess:function(data){
                     $('.organization-easyui-linkbutton-edit').linkbutton({text:'维护',plain:true,iconCls:'icon-edit'});
                     $('.organization-easyui-linkbutton-del').linkbutton({text:'删除',plain:true,iconCls:'icon-del'});
+                    $('.organization-easyui-linkbutton-grant').linkbutton({text:'授权',plain:true,iconCls:'icon-edit'});
                     that.datagridObj.datagrid("fixRownumber");
                 },
                 toolbar : "#"+this.ids.toolbar_id,
@@ -89,9 +91,11 @@
                 {field : "action",title : "操作",width : 150,
                     formatter : function(value, row, index) {
                         var str = '';
-                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-edit" data-options="plain:true,iconCls:\'icon-edit\'" onclick="role.createEditDialog(\'{0}\');" >维护</a>', row.id);
+                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-grant" onclick="role.createGrantDialog(\'{0}\');" >授权</a>', row.id);
                         str += '&nbsp;&nbsp;|&nbsp;&nbsp;';
-                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-del" data-options="plain:true,iconCls:\'icon-del\'" onclick="role.deleteFun(\'{0}\');" >删除</a>', row.id);
+                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-edit"  onclick="role.createEditDialog(\'{0}\');" >维护</a>', row.id);
+                        str += '&nbsp;&nbsp;|&nbsp;&nbsp;';
+                        str += $.formatString('<a href="javascript:void(0)" class="organization-easyui-linkbutton-del"  onclick="role.deleteFun(\'{0}\');" >删除</a>', row.id);
                         return str;
                     }
                 }
@@ -201,6 +205,55 @@
                 this.options.editDialog_options.onClose = function(){$.dialogEdit.dialog('destroy');/* 销毁面板 */};
 
                 $.dialogEdit = $("<div></div>").dialog(this.options.editDialog_options);
+            }
+        },
+        /**
+         * 对外接口，创建授权窗口
+         **/
+        createGrantDialog: function (id) {
+            if( id==null || id == '' || id == undefined)
+            {
+                $.messager.alert('错误','未知的程序错误','error');
+            }
+            else
+            {
+                var that = this;
+
+                //使编辑的行被选择
+                setTimeout(function(){that.datagridObj.datagrid("selectRecord",id);}, 0);
+
+                $.extend(this.options.grantDialog_options.queryParams,{id: id});
+
+                this.options.grantDialog_options.buttons = [
+                    {
+                        text:'保存',
+                        handler:function(){
+                            dialogHook.submitForm(function(result){
+                                if( result.success == true )
+                                {
+                                    $.messager.alert("信息",result.msg,"info");
+                                    that.datagridObj.datagrid('reload');//刷新数据表格
+                                    $.dialogGrant.dialog('close');//关闭面板
+                                }
+                                else
+                                {
+                                    $.messager.alert('info',result.msg,'error');//错误信息
+                                }
+                            });
+                        }
+                    },
+                    {
+                        text:'取消',
+                        handler:function(){
+                            //关闭窗口
+                            $.dialogGrant.dialog('close');
+
+                        }
+                    }
+                ];
+                this.options.grantDialog_options.onClose = function(){$.dialogGrant.dialog('destroy');/* 销毁面板 */};
+
+                $.dialogGrant = $("<div></div>").dialog(this.options.grantDialog_options);
             }
         },
         /**

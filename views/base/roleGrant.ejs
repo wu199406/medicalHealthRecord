@@ -1,0 +1,150 @@
+<script type="text/javascript">
+
+    $(function () {
+        $('#resourceTree').tree({
+            title:'资源',
+            url:'/resource/getTree',
+            panelHeight:'auto',
+            panelMaxHeight:200,
+            editable:false,
+            animate:true,
+            lines:true,
+            checkbox:true,
+            //cascadeCheck:false,
+            onLoadSuccess:function (node, data) {
+                checkOfIds("resourceTree","<%=grant%>".split(","));
+            }
+        });
+    });
+
+    /**
+     * 使树中的所有节点都被选中
+     **/
+    function selectAll()
+    {
+        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),1);
+    }
+
+    /**
+     * 使树中的所有节点都被不选中
+     **/
+    function unSelectAll()
+    {
+        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),2);
+    }
+
+    /**
+     * 使树中的所有节点都被反选
+     **/
+    function inverse()
+    {
+        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),3);
+    }
+
+    /**
+     * 根据getRoots参数设置树的所有的节点的选中状态
+     * @param treeId 树的id
+     * @param nodes 节点数组
+     * @param status 1：使所有节点被选中；2：使用所有节点不被选中；3：反选节点。
+     **/
+    function setTreeNodeChecked(treeId,nodes,status)
+    {
+        for(var i=0;i<nodes.length;i++)
+        {
+            var node = nodes[i];
+
+            if(status == 1)
+            {
+                $('#'+treeId).tree("check",node.target);
+            }
+            else if(status == 2)
+            {
+                $('#'+treeId).tree("uncheck",node.target);
+            }
+            else if(status == 3)
+            {
+                var unchecknodes = $('#'+treeId).tree('getChecked', 'unchecked');
+                var checknodes = $('#'+treeId).tree('getChecked');
+
+                if (unchecknodes && unchecknodes.length > 0)
+                {
+                    for ( var i = 0; i < unchecknodes.length; i++)
+                    {
+                        $('#'+treeId).tree('check', unchecknodes[i].target);
+                    }
+                }
+                if (checknodes && checknodes.length > 0)
+                {
+                    for ( var i = 0; i < checknodes.length; i++)
+                    {
+                        $('#'+treeId).tree('uncheck', checknodes[i].target);
+                    }
+                }
+            }
+
+            if( node.children && node.children.length > 0 )
+            {
+                setTreeNodeChecked(treeId,$('#'+treeId).tree("getChildren",node.target),status);
+            }
+        }
+    }
+
+
+    /**
+     * 通过树节点的id数组使相应的节点被勾选
+     * @param {String} treeId   树的id
+     * @param {Array}   idArray 树节点的id数组
+     **/
+    function checkOfIds(treeId,idArray)
+    {
+        for(var i=0;i<idArray.length;i++)
+        {
+            var node = $('#'+treeId).tree('find', idArray[i]);
+            $('#'+treeId).tree('check', node.target);
+        }
+    }
+
+    /* 页面接口 */
+    var dialogHook = {
+        /**
+         * 供主页面使用的,当前窗口内的表单的提交方法
+         *
+         * @param callback 回调函数
+         *
+         */
+        submitForm: function(callback){
+            if( typeof callback == "function" )
+            {
+                var selectNodes = $('#resourceTree').tree("getChecked")
+                var selectNodeIds = [];
+                for(var i=0;i<selectNodes.length;i++)
+                {
+                    selectNodeIds[i] = selectNodes[i].id;
+                }
+                $.post("/role/grant",{id:"<%=id%>",nodeIds:JSON.stringify(selectNodeIds)},function (result) {callback(result);},"json");
+            }
+            else
+            {
+                throw new error("callback参数的类必须为函数");
+            }
+        }
+    };
+
+</script>
+
+<style>
+    form td,form tr{
+        height:40px;
+    }
+</style>
+
+<div style="padding: 3px;">
+    <div style="height: 390px;">
+        <div id="resourceTree"></div>
+    </div>
+    <div style="margin-top: 5px;">
+        <a id="selectAll" href="#" class="easyui-linkbutton" onclick="selectAll()">全选</a>
+        <a id="unSelectAll" href="#" class="easyui-linkbutton" onclick="unSelectAll()">全不选</a>
+        <a id="inverse" href="#" class="easyui-linkbutton" onclick="inverse()">反选</a>
+    </div>
+</div>
