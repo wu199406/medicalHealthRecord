@@ -22,7 +22,7 @@
      **/
     function selectAll()
     {
-        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),1);
+        setTreeNodeChecked("resourceTree",1);
     }
 
     /**
@@ -30,7 +30,7 @@
      **/
     function unSelectAll()
     {
-        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),2);
+        setTreeNodeChecked("resourceTree",2);
     }
 
     /**
@@ -38,53 +38,49 @@
      **/
     function inverse()
     {
-        setTreeNodeChecked("resourceTree",$('#resourceTree').tree("getRoots"),3);
+        setTreeNodeChecked("resourceTree",3);
     }
 
     /**
      * 根据getRoots参数设置树的所有的节点的选中状态
      * @param treeId 树的id
-     * @param nodes 节点数组
      * @param status 1：使所有节点被选中；2：使用所有节点不被选中；3：反选节点。
      **/
-    function setTreeNodeChecked(treeId,nodes,status)
+    function setTreeNodeChecked(treeId,status)
     {
-        for(var i=0;i<nodes.length;i++)
+        var treeObj = $('#'+treeId);
+        var rootNodes = treeObj.tree("getRoots");
+
+        if(status == 1)
         {
-            var node = nodes[i];
+            rootNodes.forEach(function (item,index,array) {
+                treeObj.tree("check",item.target);
+            });
+        }
+        else if(status == 2)
+        {
+            rootNodes.forEach(function (item,index,array) {
+                treeObj.tree("uncheck",item.target);
+            });
+        }
+        else if(status == 3)
+        {
+            var unchecknodes = treeObj.tree('getChecked', 'unchecked');
+            var checknodes = treeObj.tree('getChecked');
 
-            if(status == 1)
+            if (unchecknodes && unchecknodes.length > 0)
             {
-                $('#'+treeId).tree("check",node.target);
-            }
-            else if(status == 2)
-            {
-                $('#'+treeId).tree("uncheck",node.target);
-            }
-            else if(status == 3)
-            {
-                var unchecknodes = $('#'+treeId).tree('getChecked', 'unchecked');
-                var checknodes = $('#'+treeId).tree('getChecked');
-
-                if (unchecknodes && unchecknodes.length > 0)
+                for ( var i = 0; i < unchecknodes.length; i++)
                 {
-                    for ( var i = 0; i < unchecknodes.length; i++)
-                    {
-                        $('#'+treeId).tree('check', unchecknodes[i].target);
-                    }
-                }
-                if (checknodes && checknodes.length > 0)
-                {
-                    for ( var i = 0; i < checknodes.length; i++)
-                    {
-                        $('#'+treeId).tree('uncheck', checknodes[i].target);
-                    }
+                    treeObj.tree('check', unchecknodes[i].target);
                 }
             }
-
-            if( node.children && node.children.length > 0 )
+            if (checknodes && checknodes.length > 0)
             {
-                setTreeNodeChecked(treeId,$('#'+treeId).tree("getChildren",node.target),status);
+                for ( var i = 0; i < checknodes.length; i++)
+                {
+                    treeObj.tree('uncheck', checknodes[i].target);
+                }
             }
         }
     }
@@ -97,10 +93,38 @@
      **/
     function checkOfIds(treeId,idArray)
     {
+        var treeObj = $('#'+treeId);
         for(var i=0;i<idArray.length;i++)
         {
-            var node = $('#'+treeId).tree('find', idArray[i]);
-            $('#'+treeId).tree('check', node.target);
+            var target = treeObj.tree('find', idArray[i]).target;
+            treeObj.tree('check', target);
+        }
+
+        var checkedNodes = treeObj.tree('getChecked');
+        if(checkedNodes.length>0)
+        {
+            for(var j=0;j<checkedNodes.length;j++)
+            {
+                if(idArray.indexOf(checkedNodes[j].id) == -1)
+                {
+                    treeObj.tree('uncheck',checkedNodes[j].target);
+                }
+            }
+        }
+
+        //使第二级节点折叠
+        var roots = treeObj.tree('getRoots');
+        for (var i = 0; i < roots.length; i++)
+        {
+            var childrens = treeObj.tree('getChildren', roots[i].target);
+            for (var j = 0; j < childrens.length; j++)
+            {
+                var treeNodes = treeObj.tree('getChildren', childrens[j].target);
+                if (treeNodes.length > 0)
+                {
+                    treeObj.tree('collapse', childrens[j].target);
+                }
+            }
         }
     }
 
@@ -115,12 +139,20 @@
         submitForm: function(callback){
             if( typeof callback == "function" )
             {
-                var selectNodes = $('#resourceTree').tree("getChecked")
-                var selectNodeIds = [];
+                var selectNodes = $('#resourceTree').tree("getChecked");//获取确定选中的节点
+                var notSureNodes = $('#resourceTree').tree('getChecked', 'indeterminate');//获取不确定选中的节点
+
+                var selectNodeIds = [];//确定选中和不确定选中的节点的id数组
+
                 for(var i=0;i<selectNodes.length;i++)
                 {
-                    selectNodeIds[i] = selectNodes[i].id;
+                    selectNodeIds.push(selectNodes[i].id);
                 }
+                for(var i=0;i<notSureNodes.length;i++)
+                {
+                    selectNodeIds.push(notSureNodes[i].id);
+                }
+
                 $.post("/role/grant",{id:"<%=id%>",nodeIds:JSON.stringify(selectNodeIds)},function (result) {callback(result);},"json");
             }
             else
@@ -133,9 +165,12 @@
 </script>
 
 <style>
-    form td,form tr{
-        height:40px;
+    .btn-group{
+        display:inline-block;
+        width: 30%;
+        text-align: center;
     }
+
 </style>
 
 <div style="padding: 3px;">
@@ -143,8 +178,14 @@
         <div id="resourceTree"></div>
     </div>
     <div style="margin-top: 5px;">
-        <a id="selectAll" href="#" class="easyui-linkbutton" onclick="selectAll()">全选</a>
-        <a id="unSelectAll" href="#" class="easyui-linkbutton" onclick="unSelectAll()">全不选</a>
-        <a id="inverse" href="#" class="easyui-linkbutton" onclick="inverse()">反选</a>
+        <div class="btn-group">
+            <a id="selectAll" href="#" class="easyui-linkbutton" onclick="selectAll()">全选</a>
+        </div>
+        <div class="btn-group">
+            <a id="unSelectAll" href="#" class="easyui-linkbutton" onclick="unSelectAll()">全不选</a>
+        </div>
+        <div class="btn-group">
+            <a id="inverse" href="#" class="easyui-linkbutton" onclick="inverse()">反选</a>
+        </div>
     </div>
 </div>

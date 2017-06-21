@@ -42,7 +42,6 @@ router.get("/getRoleGrant",async function(req, res, next){
         let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
 
         let result = await roleService.findById(queryParam.id);
-        console.log(result.get("resources"));
         res.render('base/roleGrant', {id:result.get('id'),grant:result.toObject().resources});
     }
     catch(e)
