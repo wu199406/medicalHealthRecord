@@ -6,44 +6,38 @@ let mongoose = require("mongoose");
 //导入
 const userModel = mongoose.model("user");
 
-class userService{
+let Util = require('../Util/Util');
+
+let BaseService = require("../service/BaseService");
+
+class userService extends BaseService
+{
     /**
      * 构造函数
      */
-    constructor(){}
-
-    /**
-     * 添加一个用户,会先判断是否存在同名用户
-     * @param user
-     * @param callback
-     */
-    static addUser(user,callback)
+    constructor()
     {
-        userModel.addUser(user,callback);
+        super(userModel);
     }
 
     /**
-     * 通过async创建新用户
+     * 添加一个新用户,先判断用户名是否已经存在
+     *
      * @param user
+     * @return {Promise.<void>}
      */
-    static async addUserPromise(user)
+    async addUser(user)
     {
-        /*查询是否存在同名用户*/
-        try {
-            let findResult = await userModel.findPromise({"userName":user.userName});
-
-            if(findResult.state == true)
-            {
-                let createResult = await userModel.createPromise(user);
-                return createResult;
-            }
-            return findResult;
-        }
-        catch (err)
+        let list = await this.model.find({userName:user.userName});
+        if(Array.isArray(list) && list.length > 0)
         {
-            return err;
+            throw new Error("用户名已经存在");
         }
+
+        await this.addOfBase(user);
     }
+
+
 }
 
 module.exports = userService;

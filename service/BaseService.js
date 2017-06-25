@@ -33,7 +33,7 @@ class BaseService
      * @param entity
      * @returns {Promise.<void>}
      */
-    async editById(entity)
+    async editByIdOfBase(entity)
     {
         if( !entity.id )
         {
@@ -52,7 +52,7 @@ class BaseService
      * @param id {String|Array} 文档的id
      * @return {Promise.<void>}
      */
-    async deleteById(id)
+    async deleteByIdOfBase(id)
     {
         if( util.isNotEmptyString(id) )
         {
@@ -73,7 +73,7 @@ class BaseService
      * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<{list, size}>}
      */
-    async findByPage(page,row,query,sortField="id")
+    async findByPageOfBase(page,row,query,sortField="id")
     {
         page = Number(page);
         row = Number(row);
@@ -91,7 +91,7 @@ class BaseService
      * @param id    {String}    id主键
      * @return {Promise.<*>}
      */
-    async findById(id) {
+    async findByIdOfBase(id) {
         if (util.isNotEmptyString(id))
         {
             return await this.model.findOne({"id": id}).exec();

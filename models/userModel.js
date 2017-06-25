@@ -7,9 +7,17 @@ var mongoose = require("mongoose");    //引用mongoose模块
 var Schema = mongoose.Schema;
 
 let userSchema = new Schema({
-    userName:String,//登录名称
-    passWord:String,//登录密码
-    name:String,//用户名称
+    id:{type:Schema.Types.ObjectId,default:mongoose.Types.ObjectId,required:true,unique:true},
+    userName:{type:String,default:null,required: true,unique: true},//登录名称
+    passWord:{type:String,default:null,required: true},//登录密码
+    name:{type:String,default:null},//用户名称
+    gender:{type:String,default:null},//性别
+    userType:{type:String,default:null},//用户类型
+    status:{type:String,default:null},//状态
+    age:{type:String,default:null},//年龄
+    depId:{type:String,default:null},//部门id
+    remark:{type:String,default:null},//备注
+    salt:{type:String,default:null},//盐
     createTime:{type: Date,default:Date.now()},//创建时间
     roles:[{type:Schema.Types.ObjectId,ref:"role"}]//权限角色数组
 });

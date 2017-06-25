@@ -23,7 +23,7 @@ router.get("/getEdit",async function(req, res, next){
     {
         let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
 
-        let result = await roleService.findById(queryParam.id);
+        let result = await roleService.findByIdOfBase(queryParam.id);
 
         res.render('base/roleEdit', {entity:result.toObject()});
     }
@@ -41,7 +41,7 @@ router.get("/getRoleGrant",async function(req, res, next){
     {
         let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
 
-        let result = await roleService.findById(queryParam.id);
+        let result = await roleService.findByIdOfBase(queryParam.id);
         res.render('base/roleGrant', {id:result.get('id'),grant:result.toObject().resources});
     }
     catch(e)
@@ -58,7 +58,7 @@ router.post("/selectPage",async function(req, res, next){
     {
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
-        let result = await roleService.findByPage(pageQuery.page,pageQuery.rows,query,'sort');
+        let result = await roleService.findByPageOfBase(pageQuery.page,pageQuery.rows,query,'sort');
 
         res.send(result);
     }
@@ -93,7 +93,7 @@ router.post("/update",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = QueryParamUtil.getQueryParamsMayHasEmpty(req,true);
 
-        let result = await roleService.editById(queryParam);
+        let result = await roleService.editByIdOfBase(queryParam);
 
         ResponseUtil.returnResponseSuccess(res,"编辑成功");
     }
@@ -109,7 +109,7 @@ router.post("/delete",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = await QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = roleService.deleteById(JSON.parse(queryParam.idArray));
+        let result = roleService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
 
         ResponseUtil.returnResponseSuccess(res,"删除成功");
     }

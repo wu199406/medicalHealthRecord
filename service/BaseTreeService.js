@@ -27,7 +27,7 @@ class BaseTreeService extends BaseService
      * @param {String|Array} id 文档的id或者id数组
      * @return {Promise.<void>}
      */
-    async deleteById(id)
+    async deleteByIdOfBase(id)
     {
         await super.deleteById(id);//调用父类方法删除文档
 
@@ -55,7 +55,7 @@ class BaseTreeService extends BaseService
      * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<Array>}
      */
-    async findOfTree(pid,excludeId = [],sortField="id")
+    async findOfTreeOfBase(pid,excludeId = [],sortField="id")
     {
         let that = this;
 
@@ -102,7 +102,7 @@ class BaseTreeService extends BaseService
      * @param {String}  [sortField]   排序字段，默认是id
      * @return {Promise.<*>}
      */
-    async findByPageOfTree(page,row,query,sortField="id")
+    async findByPageOfTreeOfBase(page,row,query,sortField="id")
     {
         page = Number(page);
         row = Number(row);

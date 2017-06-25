@@ -25,7 +25,7 @@ router.get("/getEdit",async function(req, res, next){
     {
         let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
 
-        let result = await resourceService.findById(queryParam.id);
+        let result = await resourceService.findByIdOfBase(queryParam.id);
 
         res.render('base/resourceEdit', {entity:result.toObject()});
     }
@@ -42,7 +42,7 @@ router.post("/selectPage",async function(req, res, next){
     {
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
-        let result = await resourceService.findByPage(pageQuery.page,pageQuery.rows,query,'sort');
+        let result = await resourceService.findByPageOfBase(pageQuery.page,pageQuery.rows,query,'sort');
 
         res.send(result);
     }
@@ -77,7 +77,7 @@ router.post("/update",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = QueryParamUtil.getQueryParamsMayHasEmpty(req,true);
 
-        let result = await resourceService.editById(queryParam);
+        let result = await resourceService.editByIdOfBase(queryParam);
 
         ResponseUtil.returnResponseSuccess(res,"编辑成功");
     }
@@ -93,7 +93,7 @@ router.post("/delete",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = await QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = resourceService.deleteById(JSON.parse(queryParam.idArray));
+        let result = resourceService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
 
         ResponseUtil.returnResponseSuccess(res,"删除成功");
     }
@@ -109,7 +109,7 @@ router.post("/getTree",async function(req, res, next){
         //获取请求的内容对象
         let query = QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = await resourceService.findOfTree(query,[query.id],"sort");
+        let result = await resourceService.findOfTreeOfBase(query,[query.id],"sort");
 
         res.send(result);
     }
@@ -127,7 +127,7 @@ router.post("/selectPageOfTree",async function(req, res, next){
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
 
-        let result = await resourceService.findByPageOfTree(pageQuery.page,pageQuery.rows,query,"sort");
+        let result = await resourceService.findByPageOfTreeOfBase(pageQuery.page,pageQuery.rows,query,"sort");
         res.send(result);
     }
     catch (e)
