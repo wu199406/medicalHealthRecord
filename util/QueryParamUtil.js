@@ -33,7 +33,7 @@ class QueryParamUtil
     }
 
     /**
-     * 将expresss的请求参数抽出出来并返回
+     * 将expresss的请求参数抽出出来并返回,可以设置是否返回值为空的请求参数
      * @param req   {Express.Request}   请求参数对象
      * @param flat  {boolean}   true,会返回空的属性(包括null和空字符串);false,不会返回空的属性。默认为true。
      * @return {{}}
@@ -50,7 +50,7 @@ class QueryParamUtil
     }
 
     /**
-     * 根据属性名数组将expresss的请求参数抽出出来并返回
+     * 根据属性名数组将expresss的请求参数抽出出来并返回,可以设置是否返回值为空的请求参数
      * @param req   {Express.Request}   请求参数对象
      * @param fields    {Array} 属性名数组
      * @param flat  {boolean}   true,会返回空的属性(包括null和空字符串);false,不会返回空的属性。默认为true。
