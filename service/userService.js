@@ -37,7 +37,22 @@ class userService extends BaseService
         await this.addOfBase(user);
     }
 
+    /**
+     * 更新一个用户,先判断用户名是否已经存在
+     *
+     * @param user
+     * @return {Promise.<void>}
+     */
+    async editUser(user)
+    {
+        let list = await this.model.find({userName:user.userName});
+        if(Array.isArray(list) && list.length > 0)
+        {
+            throw new Error("用户名已经存在");
+        }
 
+        await this.editByIdOfBase(user);
+    }
 }
 
 module.exports = userService;

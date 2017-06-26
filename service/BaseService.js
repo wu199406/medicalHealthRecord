@@ -49,7 +49,7 @@ class BaseService
 
     /**
      * 删除一个或者多个文档
-     * @param id {String|Array} 文档的id
+     * @param id {String|Array} 文档的id,可以是要删除的记录的id数组
      * @return {Promise.<void>}
      */
     async deleteByIdOfBase(id)
