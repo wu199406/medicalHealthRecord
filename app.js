@@ -9,11 +9,8 @@ let bodyParser = require('body-parser');//提供了将post请求的正文中的j
 //引入数据库接口，启动mongodb数据库
 let dao = require("./dao/daoInterface.js");
 
-//引入路由模块
-let index = require('./routes/indexRout');
-let users = require('./routes/usersRout');
-let role = require('./routes/roleRout');
-let resource = require("./routes/resourceRout");
+//引入路由入口模块
+let routEntrance = require("./routes/routEntrance");
 
 let app = express();
 
@@ -35,10 +32,8 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, 'public')));//管理静态文件
 
-app.use('/', index);
-app.use('/users', users);
-app.use('/role', role);
-app.use("/resource",resource);
+//调用路由入口配置函数，配置路由
+routEntrance(app);
 
 // catch 404 and forward to error handler
 //找不到错误
