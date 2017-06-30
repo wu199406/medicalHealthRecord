@@ -16,7 +16,7 @@ let resource = require("../routes/resourceRout");
  */
 let routConfigFun = function(app){
     app.use('/', index);
-    app.use('/users', users);
+    app.use('/user', users);
     app.use('/role', role);
     app.use("/resource",resource);
 };

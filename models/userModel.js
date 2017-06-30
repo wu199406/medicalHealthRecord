@@ -15,7 +15,7 @@ let userSchema = new Schema({
     userType:{type:String,default:null},//用户类型
     status:{type:String,default:null},//状态
     age:{type:String,default:null},//年龄
-    depId:{type:String,default:null},//部门id
+    depId:{type:String,default:null},//部门id或者角色组,当前未实现相关功能
     remark:{type:String,default:null},//备注
     salt:{type:String,default:null},//盐
     createTime:{type: Date,default:Date.now()},//创建时间
