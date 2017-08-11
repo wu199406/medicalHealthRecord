@@ -13,8 +13,18 @@
     "express": "~4.14.0",
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.0",
-    "mongoose":"4.10.2",
+    "mongoose": "4.10.2",
     "express-formidable": "1.0.0",
-    "express-session": "1.14.2"
+    "express-session": "1.14.2",
+    "babel-loader":"^7.1.1",
+    "babel-core":"^6.25.0",
+    "style-loader": "^0.18.2",
+    "css-loader": "^0.28.4",
+    "html-webpack-plugin": "^2.29.0",
+    "extract-text-webpack-plugin":"^2.1.2",
+    "postcss-loader":"^2.0.6"
+  },
+  "devDependencies": {
+    "webpack": "^3.0.0"
   }
 }
