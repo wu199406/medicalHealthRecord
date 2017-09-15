@@ -1,7 +1,44 @@
 <script type="text/javascript">
 
     $(function () {
+        /*设置性别下拉选择框*/
+        $("#gender").combobox({
+            data:[{text:'男',value:'男'},{text:'女',value:'女'}],
+            panelMaxHeight:200,
+            panelHeight:"auto",
+            value:"男"
+        });
 
+        /*设置用户类型下拉选择框*/
+        $("#userType").combobox({
+            data:[{text:'普通用户',value:'1'},{text:'管理员',value:'0'}],
+            panelMaxHeight:200,
+            panelHeight:"auto",
+            value:"1"
+        });
+
+        /*设置用户状态下拉选择框*/
+        $("#status").combobox({
+            data:[{text:'正常',value:'1'},{text:'锁定',value:'0'}],
+            panelMaxHeight:200,
+            panelHeight:"auto",
+            value:"1"
+        });
+
+        /*设置所属部门状态下拉选择框*/
+        $("#depId").combobox({
+            data:[],
+            panelMaxHeight:200,
+            panelHeight:"auto"
+        });
+
+        $("#roles").combobox({
+            url:"/role/selectList",
+            valueField:"id",
+            textField:"name",
+            panelMaxHeight:200,
+            panelHeight:"auto"
+        });
     });
 
     /* 页面接口 */
@@ -54,35 +91,83 @@
         <table class="grid">
             <tr>
                 <td class="trLeft width-15">
-                    <label for="name">角色名称:</label>
+                    <label for="userName">登录名称:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="userName" value="<%=entity.userName%>" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="passWord">登录密码:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-textbox" name="passWord" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="name">用户名称:</label>
                 </td>
                 <td class="trRight width-35">
                     <input class="easyui-textbox" name="name" value="<%=entity.name%>" style="width: 200px; height: 29px;"/>
                 </td>
 
                 <td class="trLeft width-15">
-                    <label for="sort">排序次序:</label>
+                    <label for="gender">性别:</label>
                 </td>
                 <td class="trRight width-35">
-                    <input class="easyui-numberspinner" name="sort" value="<%=entity.sort%>" data-options="min:0" style="width: 200px; height: 29px;"/>
+                    <input id="gender" name="gender" value="<%=entity.gender%>" style="width: 200px; height: 29px;"/>
                 </td>
             </tr>
 
             <tr>
                 <td class="trLeft width-15">
-                    <label for="status">角色的状态:</label>
+                    <label for="userType">用户类型:</label>
                 </td>
-                <td class="trRight width-85" colspan="3">
-                    <input class="easyui-textbox" name="status" value="<%=entity.status%>" style="width: 200px; height: 29px;"/>
+                <td class="trRight width-35">
+                    <input id="userType" name="userType" value="<%=entity.userType%>" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="status">状态:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input id="status" name="status" value="<%=entity.status%>" style="width: 200px; height: 29px;"/>
                 </td>
             </tr>
 
             <tr>
                 <td class="trLeft width-15">
-                    <label for="note">资源的说明:</label>
+                    <label for="age">年龄:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input class="easyui-numberbox" name="age" value="<%=entity.age%>" style="width: 200px; height: 29px;"/>
+                </td>
+
+                <td class="trLeft width-15">
+                    <label for="depId">所属部门:</label>
+                </td>
+                <td class="trRight width-35">
+                    <input id="depId" name="depId" value="<%=entity.depId%>" style="width: 200px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="roles">角色:</label>
                 </td>
                 <td class="trRight width-85" colspan="3">
-                    <input class="easyui-textbox" name="note" value="<%=entity.note%>" style="width: 530px; height: 29px;"/>
+                    <input id="roles"  name="roles" value="<%=entity.roles%>" style="width: 530px; height: 29px;"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="trLeft width-15">
+                    <label for="remark">备注:</label>
+                </td>
+                <td class="trRight width-85" colspan="3">
+                    <input class="easyui-textbox" name="remark" value="<%=entity.remark%>" data-options="multiline:true" style="width: 530px; height: 60px;"/>
                 </td>
             </tr>
         </table>

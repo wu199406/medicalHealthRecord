@@ -87,6 +87,19 @@ class BaseService
     }
 
     /**
+     * 查询所有值
+     * @param query 查询条件对象
+     * @param {String}  [sortField]   排序字段，默认是id
+     * @return {Promise.<list>}
+     */
+    async findAllOfBase(query,sortField="id")
+    {
+        query = modelUtil.getPropertyNotNullObject(query);
+        let rows = await  this.model.find().where(query).sort({[sortField]:1}).exec();
+        return rows;
+    }
+
+    /**
      * 根据id获取相应的文档
      * @param id    {String}    id主键
      * @return {Promise.<*>}

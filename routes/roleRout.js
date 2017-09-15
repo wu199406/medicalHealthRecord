@@ -70,6 +70,23 @@ router.post("/selectPage",async function(req, res, next){
     res.end();
 });
 
+router.post("/selectList",async function(req, res, next){
+    try
+    {
+        //获取请求的内容对象
+        let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
+        let result = await roleService.findAllOfBase(query,'sort');
+
+        res.send(result);
+    }
+    catch (e)
+    {
+        console.log(e);
+        res.send(new PageUtil());
+    }
+    res.end();
+});
+
 router.post("/insert",async function(req, res, next){
     try
     {

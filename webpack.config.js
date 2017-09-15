@@ -1,47 +1,58 @@
-/**
- * webpack的配置文件
- * Created by wu199406 on 2017/7/1.
- */
-let path = require('path');
-let htmlWebpackPlugin = require('html-webpack-plugin');
-//let ExtractTextPlugin = require("extract-text-webpack-plugin");
+var path = require('path')
+var webpack = require('webpack')
 
 module.exports = {
-    /**
-     * 设置入口
-     */
     entry:{
-        hello:[path.resolve('./src/hello.js'),path.resolve('./src/a.js')]/*入口文件的路径*/
+        hello:path.resolve('./client/src/main.js')
     },
-    /**
-     * 设置出口
-     */
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: '[name].js'
+        path: path.resolve(__dirname, './client/dist'),//Webpack结果存储
+        publicPath: '/dist/',//懵懂，懵逼，//然而“publicPath”项则被许多Webpack的插件用于在生产模式和开发模式下下更新内嵌到css、html，img文件里的url值
+        filename: 'build.js'
     },
-    /**
-     * 设置加载器和使用加载器的使用规则
-     */
     module: {
         rules: [
-            {test: /\.(js|jsx)$/, use: 'babel-loader', include: /src/},
-            /*
-            * 当css-loader的modules设置为false时,不会重写类名
-            * { test: /\.css$/, loader:  ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' }),include: /src/ }--实现类文件抽取
-            */
-            {test: /\.css$/, use: [{ loader: 'style-loader'}, {loader: 'css-loader',options: {modules: false}},], include: /src/},
+            {test: /\.vue$/,use: 'vue-loader'  },
+            { test: /\.js$/,use: 'babel-loader',include: /client/},
+            {test: /\.(png|jpg|gif|svg)$/, use: {loader: "file-loader",options:{name: '[name].[ext]?[hash]' }} },
+            {test: /\.css$/, use: [{ loader: 'style-loader'}, {loader: 'css-loader',options: {modules: false}}], include: /client/},
+           /* { test: /\.scss$/, loader: "style-loader!css-loader!sass-loader!"}*/
         ]
+    }/*,
+    resolve: {
+        alias: {
+            'vue$': 'vue/dist/vue.esm.js'
+        }
     },
-    /**
-     * 设置插件
-     */
-    plugins: [
-        new htmlWebpackPlugin({
-            filename:'index.html',
-            template:path.resolve('./src/hello.html'),
-            inject:'head'
-        }),
-        //new ExtractTextPlugin('styles.css')
-    ]
+    devServer: {//webpack-dev-server配置
+        historyApiFallback: true,//不跳转
+        noInfo: true,
+        inline: true//实时刷新
+    },
+    performance: {
+        hints: false
+    },
+    devtool: '#eval-source-map'*/
 };
+
+/*if (process.env.NODE_ENV === 'production') {
+    module.exports.devtool = '#source-map'
+    // http://vue-loader.vuejs.org/en/workflow/production.html
+    module.exports.plugins = (module.exports.plugins || []).concat([
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: '"production"'
+            }
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            sourceMap: true,
+            compress: {
+                warnings: false
+            }
+        }),
+        new webpack.LoaderOptionsPlugin({
+            minimize: true
+        })
+    ])
+}*/
+

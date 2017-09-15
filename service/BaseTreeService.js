@@ -86,7 +86,7 @@ class BaseTreeService extends BaseService
                 tree.state = value.status;
                 tree.checked = false;
 
-                tree.children = await that.findOfTree(tree.id,excludeId);//递归
+                tree.children = await that.findOfTreeOfBase(tree.id,excludeId);//递归
 
                 childrenTrees.push(tree);
             }
