@@ -1,18 +1,13 @@
-//index.vue
+<!--首页的内容-->
 <template>
-    <div>
-        <ol>
-            <li v-for="todo in todos">
-                {{ todo.text }}
-            </li>
-        </ol>
-        <button @click="eClick()">事件</button>
-    </div>
+   <!--顶部图片区域-->
+   <ImgCarousel></ImgCarousel>
 </template>
 
 <script>
+   import ImgCarousel from "../components/imgCarousel.vue";
     export default {
-        name: 'indexP',
+        name: 'home',
         data () {
             return {
                 todos: [
@@ -26,6 +21,9 @@
             eClick(){
                 console.log(9999);
             }
+        },
+        components:{
+            ImgCarousel
         }
     }
 </script>
