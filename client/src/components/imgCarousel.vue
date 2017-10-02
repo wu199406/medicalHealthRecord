@@ -1,11 +1,13 @@
 <!--图片轮播组件-->
 <template>
     <div class="imgCarousel-content">
-        <div v-bind:style="{width:(parentWidth*3)+'px'}">
+        <div ref="imgContainer" v-bind:style="{width:(parentWidth*3)+'px'}"><!--轮播图片的容器-->
             <img v-for="(item, index) in imgArray" v-bind:src="item" v-bind:style="{width:parentWidth+'px',left:(parentWidth*index)+'px',top:'0px'}"/>
         </div>
-        <div class="imgCarousel-button imgCarousel-left-button iconfont icon-leftjiantou"></div>
-        <div class="imgCarousel-button imgCarousel-right-button iconfont icon-youjiantou"></div>
+        <template v-if="imgArray.length>1"><!--使用包装元素-->
+            <div class="imgCarousel-button imgCarousel-left-button iconfont icon-leftjiantou" v-on:click="pictureLeftMove"></div>
+            <div class="imgCarousel-button imgCarousel-right-button iconfont icon-youjiantou" v-on:click="pictureRightMove"></div>
+        </template>
     </div>
 </template>
 
@@ -23,7 +25,20 @@
             };
         },
         methods:{
-
+            /**
+             * 左移动图片
+             */
+            pictureLeftMove:function(){
+                let itme1 = this.imgArray.shift();
+                this.imgArray.push(itme1);
+            },
+            /**
+             * 右移动图片
+             */
+            pictureRightMove:function(){
+                let itme1 = this.imgArray.pop();
+                this.imgArray.unshift(itme1);
+            }
         },
         created:function(){
             console.log("图片轮播创建");
