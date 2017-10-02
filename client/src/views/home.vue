@@ -1,7 +1,9 @@
 <!--首页的内容-->
 <template>
-   <!--顶部图片区域-->
-   <ImgCarousel></ImgCarousel>
+   <div class="home-content" ref="homeRef">
+      <!--顶部图片区域-->
+      <ImgCarousel v-bind:parentWidth="homeContentWidth"></ImgCarousel>
+   </div>
 </template>
 
 <script>
@@ -10,20 +12,30 @@
         name: 'home',
         data () {
             return {
-                todos: [
-                    { text: 'Learn JavaScript' },
-                    { text: 'Learn Vue' },
-                    { text: 'Build something awesome' }
-                ]
-            }
+                homeContentWidth:0
+            };
         },
         methods:{
-            eClick(){
-                console.log(9999);
-            }
+
+        },
+        computed:{
+
         },
         components:{
             ImgCarousel
+        },
+        created:function(){
+            console.log("首页轮播创建");
+        },
+        mounted:function(){
+            console.log("首页加载完成");
+            this.$data.homeContentWidth = this.$el.clientWidth;
         }
     }
 </script>
+
+<style type="text/css">
+   .home-content{
+      width: 100%;
+   }
+</style>

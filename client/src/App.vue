@@ -2,7 +2,7 @@
 <template>
     <div id="app">
         <header-tab></header-tab>
-        <div>
+        <div class="content">
             <router-view></router-view>
         </div>
     </div>
@@ -14,8 +14,7 @@
         name: 'app',
         data () {
             return {
-                msg: '欢迎，使用该vue app'
-            }
+            };
         },
         components:{
             HeaderTab

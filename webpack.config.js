@@ -8,14 +8,24 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, './public'),//Webpack结果存储
-        publicPath: '/public/',//当输出文件作为资源被引入到html时,设置url
+        //publicPath: '/public/',// 表示资源的发布地址，当配置过该属性后，打包文件中所有通过相对路径引用的资源都会被配置的路径所替换
         filename: 'index.js'
     },
     module: {
         rules: [
             {test: /\.vue$/,use: 'vue-loader',include: /client/},
             { test: /\.js$/,use: 'babel-loader',include: /client/},
-            {test: /\.(png|jpg|gif|svg)$/, use: {loader: "file-loader",options:{name: '[name].[ext]?[hash]' }} ,include: /client/},
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                use: {
+                        loader: "file-loader",
+                        options:{
+                                name: '[name].[ext]?[hash]',
+                                outputPath: 'images/'
+                        }
+                } ,
+                include: /client/
+            },
             {test: /\.css$/, use: [{ loader: 'style-loader'}, {loader: 'css-loader',options: {modules: false}}], include: /client/},
            /* { test: /\.scss$/, loader: "style-loader!css-loader!sass-loader!"}*/
         ]

@@ -1,3 +1,4 @@
+<!--页面的公用的头部,带有网站的名称和导航栏-->
 <template>
     <div class="header">
         <div class="header-title">{{title}}</div>
@@ -51,6 +52,7 @@
     }
     .header-title{
         float: left;
+        margin-left: 20px;
     }
     .header-content{
         float:right;
