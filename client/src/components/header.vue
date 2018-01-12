@@ -18,9 +18,9 @@
                 title:"背景墙",
                 navData:[
                     {name:"首页",url:"/"},
-                    {name:"项目案例",url:"/"},
-                    {name:"招聘信息",url:"/about"},
-                    {name:"联系",url:"/"}
+                    {name:"项目案例",url:"/case"},
+                    {name:"招聘信息",url:"/recruit"},
+                    {name:"联系",url:"/contact"}
                 ]
             };
         },
@@ -41,6 +41,15 @@
                     }
                 }
             }
+        },
+        created:function(){
+            console.log("导航栏创建");
+        },
+        mounted:function(){
+            console.log("导航栏加载完成");
+        },
+        update:function(){
+            console.log("导航栏更新");
         }
     };
 </script>
@@ -52,10 +61,11 @@
     }
     .header-title{
         float: left;
-        margin-left: 20px;
+        margin-left: 10%;
     }
     .header-content{
         float:right;
+        margin-right: 10%;
     }
     .header-content ul{
         line-height: 60px;

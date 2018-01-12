@@ -1,8 +1,8 @@
 <!--图片轮播组件-->
 <template>
     <div class="imgCarousel-content">
-        <div ref="imgContainer" v-bind:style="{width:(parentWidth*3)+'px'}"><!--轮播图片的容器-->
-            <img v-for="(item, index) in imgArray" v-bind:src="item" v-bind:style="{width:parentWidth+'px',left:(parentWidth*index)+'px',top:'0px'}"/>
+        <div ref="imgContainer" v-bind:style="{width:(componentWidth*3)+'px',height:(componentWidth*imgProportion)+'px'}"><!--轮播图片的容器-->
+            <img v-for="(item, index) in imgArray" v-bind:src="item" v-bind:style="{width:componentWidth+'px',height:(componentWidth*imgProportion)+'px',left:(componentWidth*index)+'px',top:'0px'}"/>
         </div>
         <template v-if="imgArray.length>1"><!--使用包装元素-->
             <div class="imgCarousel-button imgCarousel-left-button iconfont icon-leftjiantou" v-on:click="pictureLeftMove"></div>
@@ -18,9 +18,19 @@
 
     export default {
         name:'imgCarousel',
-        props:["parentWidth"],
+        props:{
+            imgProportion:{
+                type: Number,
+                default: (800/1920),
+                required: false,
+                validator: function (value) {
+                    return value >= 0
+                }
+            }
+        },
         data:function(){
             return {
+                componentWidth:0,//组件的宽度
                 imgArray:[img1,img2,img3]
             };
         },
@@ -38,17 +48,36 @@
             pictureRightMove:function(){
                 let itme1 = this.imgArray.pop();
                 this.imgArray.unshift(itme1);
+            },
+            /**
+             * 当组件的所在的窗口的大小发生变化时,修改width属性,以修改图片的高度
+             * @param event
+             */
+            resize(event){
+                let that = this;
+                let flag  = false;
+                return (function () {
+                    if(flag == false)
+                    {
+                        flag = true;
+                        setTimeout(()=>{
+                            flag = false;
+                            that.componentWidth = that.$el.clientWidth;
+                        },300);
+                    }
+                });
             }
         },
         created:function(){
             console.log("图片轮播创建");
+            window.addEventListener('resize', this.resize());
         },
         mounted:function(){
             console.log("图片轮播加载完成");
-            console.log(this.$props);
+            this.componentWidth = this.$el.clientWidth;
         },
-        update:function(){
-            console.log(this.$props)
+        updated:function(){
+            console.log("图片轮播更新");
         }
     };
 </script>
@@ -57,6 +86,7 @@
     .imgCarousel-content{
         width:100%;
         position: relative;
+        overflow: hidden;
     }
     .imgCarousel-content img{
         height: auto;

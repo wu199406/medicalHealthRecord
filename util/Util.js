@@ -1,7 +1,18 @@
 /**
  * Created by wu199406 on 2017/3/2.
+ * @module Util
  */
 
+/**
+ * 这是用于类型判断的基础类
+ * @typedef {Object} Util~Is
+ * @property {Array.<String>} types 类型名称字符串数组
+ */
+/**
+ * module:Util~is
+ * @description 类型名称字符串数组,用于类型判断
+ * @type {Util~Is}
+ */
 var is ={
     types : ["Array", "Boolean", "Date", "Number", "Object", "RegExp", "String", "Window", "HTMLDocument"]
 };
@@ -38,8 +49,8 @@ class util{
     }
 
     /**
-     * 如果参数obj是undefined、null、空字符串或者由多个空字符串组成的字符串时，返回true；否则返回false。
-     * @param obj
+     * @description 如果参数obj是undefined、null、空字符串或者由多个空字符串组成的字符串时，返回true；否则返回false。
+     * @param {*} obj
      * @return {boolean}
      */
     static isEmpty(obj)
