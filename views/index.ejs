@@ -1,25 +1,316 @@
-<!--使用web应用模式,所有功能均通过修改该页面的内部iframe展示-->
-
+<!--模版-->
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <% include base/relyOn.ejs %><!--设置meta和导入依赖-->
-    <title>医疗健康档案管理系统</title>
-  </head>
-  <body>
+<head>
+  <title>后台管理系统首页</title>
+  <!-- 引入样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 
-    <form action="users/addUser" method="post" style="">
-      <div class="form-group">
-        <label for="userName">Email address</label>
-        <input type="text" class="form-control" id="userName" name="userName" placeholder="登录名称">
-      </div>
-      <div class="form-group">
-        <label for="passWord">Email address</label>
-        <input type="password" class="form-control" id="passWord" name="passWord" placeholder="密码">
-      </div>
-      <button type="submit" class="btn btn-default">注册</button>
-    </form>
+  <style>
+    head{
+      width:100%;
+      height:100%;
+    }
+    body{
+      width:100%;
+      height:100%;
+      margin: 0px;
+    }
 
+    .el-header, .el-footer {
+      background-color: #B3C0D1;
+      color: #333;
+      text-align: center;
+    }
 
-  </body>
+    .el-main {
+      background-color: #E9EEF3;
+      color: #333;
+      text-align: center;
+    }
+
+    .wu-aside-navigation-bar{
+      padding: 3px;
+      box-sizing: content-box;
+      box-shadow: inset 0px 0px 3px 0px #0059b6;
+
+      background-color: #139de4;
+      color: #333;
+      text-align: center;
+    }
+
+    .wu-tab-page-tabs{
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .wu-tab-page-tabs>.el-tabs__content{
+      padding: 2px;
+      height: calc( 100% - 39px);
+      box-sizing: border-box;
+    }
+    .wu-tab-page-tabs>.el-tabs__content>div{
+      height: 100%;
+      width: 100%;
+    }
+    .wu-tab-page-tabs>.el-tabs__content>div>iframe{
+      height: 100%;
+      width: 100%;
+      border: none;
+    }
+    .wu-tab-page-tabs .el-tabs__nav-scroll{
+      height: 39px;
+    }
+  </style>
+
+</head>
+
+<body>
+<div id="AppId">
+</div>
+</body>
+
+<script type="text/javascript" src="/easyui/jquery.min.js" charset="utf-8"></script><!--导入jq文件-->
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script>
+    /**
+     * 创建导航栏组件
+     * 它由NavMenu组件构成
+     */
+    Vue.component("navigation-bar",{
+        render: function (createElement) {
+            var rootEle = createElement('el-menu',{props:{},on:{select:this.clickHandler},style:{'box-shadow':'0 0 2px black'}},this.createElementByTree(this.data,createElement));
+            return rootEle;
+        },
+        data:function(){
+            this.getData();
+            return {
+                data:[]
+            };
+        },
+        methods:{
+            /**
+             * 远程获取导航栏的导航数据
+             */
+            getData:function(){
+                var that = this;
+                $.post('/resource/getTree',{},function(result){
+                    that.data = result;
+                });
+            },
+            /**
+             * 这是辅助render函数渲染组件,递归渲染
+             * @param {Object[]} data - 要渲染的数据,即远程获取的数据;或者是一个节点的子节点的数据;
+             * @param {Function} createElement - render函数的参数createElement
+             * @param {String} parentIndex  父节点的index字符串
+             * @return {VNode[]}    返回虚拟的vueElement数据
+             */
+            createElementByTree:function(data,createElement,parentIndex){
+                var eles = [];
+
+                if(Array.isArray(data)&&data.length>0)
+                {
+                    for(var i=0;i<data.length;i++)
+                    {
+                        var indexStr = ( parentIndex!=undefined && parentIndex!=null ) ? (parentIndex + '-' + i) : String(i);
+                        var ele = null;
+                        var item = data[i];
+
+                        var childrenEles = this.createElementByTree(item.children,createElement,indexStr);
+                        if(childrenEles.length > 0)
+                        {
+                            ele = createElement('el-submenu',{props:{index:indexStr},scopedSlots: {
+                                title: function (props) {
+                                    return createElement('span', item.text);
+                                },
+                            }},childrenEles);
+                        }
+                        else
+                        {
+                            ele = createElement('el-menu-item',{props:{index:indexStr},domProps:{innerHTML:item.text}});
+                        }
+
+                        eles.push(ele);
+                    }
+                }
+
+                return eles;
+            },
+            /**
+             * 根据选中的index获取指向的data中元素的url
+             * @param {String} index - 格式为:number-number...的字符串,这是data数据的路由
+             * @param {Object[]} childrenDatas - data的元素的children的值,用于递归
+             * @return {Object} 返回选中的data中的元素
+             */
+            getUrlBySelectIndex:function(index,childrenDatas){
+                var data = null;
+
+                if(Array.isArray(childrenDatas))
+                {
+                    data = childrenDatas;
+                }
+                else
+                {
+                    data = this.data;
+                }
+
+                var selectRoute = index.split('-');
+
+                if(selectRoute.length == 1)
+                {
+                    return data[ selectRoute[0] ];
+                }
+                else if(selectRoute.length > 1)
+                {
+                    var item = data[ selectRoute.shift() ];
+                    return this.getUrlBySelectIndex(selectRoute.join('-'),(Array.isArray(item.children)?item.children:[]));
+                }
+                else
+                {
+                    return null;
+                }
+            },
+            /**
+             * NavMenu导航菜单的select事件(即el-menu-item元素的点击事件)的处理器
+             * @param index
+             * @param indexPath
+             */
+            clickHandler:function(index,indexPath){
+                var item = this.getUrlBySelectIndex(index);
+                this.openPage(item);
+            },
+            /**
+             * @fires openPage - 触发openPage事件,表示要打开相应的url的页面
+             * @param {Object} item - 要打开的页面的数据对象
+             */
+            openPage:function (item) {
+
+                var url = (item.attributes!=undefined&&item.attributes!=null)?item.attributes.url:'';
+
+                /**
+                 * @event openPage
+                 * @type {object}
+                 * @property {String} name - 要打开的页面的名称
+                 * @property {String} url - 要打开的页面的路径
+                 */
+                this.$emit('openPage',{name:item.text,url:url});
+            }
+        }
+    });
+
+    /**
+     * 使用Tabs显示多个页面的组件
+     */
+    Vue.component('tab-page',{
+        render: function (createElement) {
+            var tabEles = [];
+            for(var tabData of this.tabs)
+            {
+                tabEles.push( createElement('el-tab-pane',{key:tabData.name,props:{label:tabData.name,name:tabData.name}},[createElement('iframe',{attrs:{src:tabData.url}})]) );
+            }
+
+            var rootEle = createElement('el-tabs',{class:{'wu-tab-page-tabs':true},props:{closable:true,type:'border-card',value:this.selectTabName},on:{'tab-remove':this.deleteTabHandler}},tabEles);
+            return rootEle;
+        },
+        props:['newTabPage'],
+        data:function(){
+            return {
+                selectTabName:null,
+                tabs:[],
+                update:0
+            };
+        },
+        methods:{
+            deleteTabHandler:function(tabName){
+                var deleteTabIndex = null;
+                this.tabs.forEach((item,index)=>{
+                    if(item.name == tabName)
+                    {
+                        deleteTabIndex = index;
+                    }
+                });
+
+                if( deleteTabIndex !=null )
+                {
+                    this.tabs.splice(deleteTabIndex,1);
+                    this.selectTabName = (this.tabs.length>deleteTabIndex)?(this.tabs[deleteTabIndex].name):(this.tabs.length>0&&this.tabs.length==deleteTabIndex?(this.tabs[deleteTabIndex-1].name):null);
+                }
+            },
+            /**
+             * @param {Object} tabData - 新添加的tab的数据对象
+             * @param {String} tabData.name - 新添加的tab的名称
+             * @param {Sting} tabData.url - 新添加的tab的url
+             */
+            addTab:function(tabData){
+
+                if(tabData != undefined && tabData != null)
+                {
+                    var isExist = this.tabs.some((item,index)=>{
+                        if(item.name == tabData.name)
+                        {
+                            return true;
+                        }
+                    });
+
+                    if(!isExist)
+                    {
+                        this.tabs.push(tabData);
+                    }
+
+                    this.selectTabName = tabData.name;
+                }
+            }
+        },
+        watch:{
+            newTabPage:function(newValue,oldValue){
+                this.addTab(newValue);
+            }
+        }
+    });
+
+    new Vue({
+        el: '#AppId',
+        render: function (createElement) {
+            return createElement(
+                'el-container', {attrs:{ id:'app'},style:{height:this.height}},
+                [
+                    createElement('el-header',{props:{height:this.headHeight},domProps:{innerHTML:"头部"}}),
+                    createElement(
+                        'el-container',
+                        [
+                            createElement('el-aside',{class:{'wu-aside-navigation-bar':true},props:{width:this.asideWidth}},[createElement('navigation-bar',{on:{openPage:this.openPageHandler}})]),
+                            createElement('el-main',{style:{padding:'3px'}},[createElement('tab-page',{props:{newTabPage:this.newTabPage}})])
+                        ]
+                    ),
+                    createElement('el-footer',{props:{height:this.footerHeight}})
+                ]
+            );
+        },
+        data:function(){
+            return {
+                height: window.innerHeight+'px',
+                headHeight:'80px',
+                footerHeight:'40px',
+                asideWidth:'200px',
+
+                /**
+                 * 添加的新的tab的信息对象
+                 * @property {String} name - 要打开的页面的名称
+                 * @property {String} url - 要打开的页面的路径
+                 */
+                newTabPage:null
+            };
+        },
+        methods:{
+            openPageHandler:function (object) {
+                console.log('要打开的'+object.name+'页面的路径:'+object.url)
+                this.newTabPage = object;
+            }
+        }
+    });
+</script>
+
 </html>

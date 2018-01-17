@@ -1,7 +1,6 @@
 <script type="text/javascript">
 
     $(function () {
-        console.log($('#parentResource')[0]);
         $('#parentResource').combotree({
             url:'/resource/getTree',
             queryParams:{id:"<%=entity.id%>"},
@@ -9,7 +8,17 @@
             panelMaxHeight:200,
             editable:false,
             animate:true,
-            lines:true
+            lines:true,
+            loadFilter:function(data){
+                var topTree = {
+                    id:null,
+                    text:'空',
+                    state:'open',
+                    children:data,
+                    iconCls:'icon-folder'
+                };
+                return [topTree];
+            }
         });
     });
 
