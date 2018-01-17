@@ -1,7 +1,7 @@
 /**
- * Created by wu199406 on 2017/5/22.
+ * Created by wu199406 on 2018/1/16.
  */
-//导入Express路由
+
 let express = require('express');
 let router = express.Router();
 
@@ -10,24 +10,23 @@ let QueryParamUtil = require("../util/QueryParamUtil");
 let ResponseUtil = require("../util/ResponseUtil");
 let PageUtil = require("../vo/PageUtil");
 
-let resourceServiceClass = require("../service/resourceService");//获取服务类
-let resourceService = new resourceServiceClass();//创建服务实例
+let BackgroundCaseService = require("../service/BackgroundCaseService");//获取服务类
+let backgroundCaseService = new BackgroundCaseService();//创建服务实例
 
 router.get("/index",function(req, res, next){
-    res.render('base/resource', {});
+    res.render('business/backgroundCase', {});
 });
-
 router.get("/getAdd",function(req, res, next){
-    res.render('base/resourceAdd', {});
+    res.render('business/backgroundCaseAdd', {});
 });
 router.get("/getEdit",async function(req, res, next){
     try
     {
         let queryParam = QueryParamUtil.getQueryParamsOfFields(req,["id"]);
 
-        let result = await resourceService.findByIdOfBase(queryParam.id);
+        let result = await backgroundCaseService.findByIdOfBase(queryParam.id);
 
-        res.render('base/resourceEdit', {entity:result.toObject()});
+        res.render('business/backgroundCaseEdit', {entity:result.toObject()});
     }
     catch(e)
     {
@@ -42,7 +41,7 @@ router.post("/selectPage",async function(req, res, next){
     {
         //获取请求的内容对象
         let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
-        let result = await resourceService.findByPageOfBase(pageQuery.page,pageQuery.rows,query,'sort');
+        let result = await backgroundCaseService.findByPageOfBase(pageQuery.page,pageQuery.rows,query,'sort');
 
         res.send(result);
     }
@@ -60,7 +59,7 @@ router.post("/insert",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = QueryParamUtil.getQueryParamsMayHasEmpty(req,false);
 
-        let result = await resourceService.addOfBase(queryParam);
+        let result = await backgroundCaseService.addOfBase(queryParam);
 
         ResponseUtil.returnResponseSuccess(res,"添加成功");
     }
@@ -77,7 +76,7 @@ router.post("/update",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = QueryParamUtil.getQueryParamsMayHasEmpty(req,true);
 
-        let result = await resourceService.editByIdOfBase(queryParam);
+        let result = await backgroundCaseService.editByIdOfBase(queryParam);
 
         ResponseUtil.returnResponseSuccess(res,"编辑成功");
     }
@@ -93,7 +92,7 @@ router.post("/delete",async function(req, res, next){
         //获取请求的内容对象
         let queryParam = await QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = resourceService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
+        let result = backgroundCaseService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
 
         ResponseUtil.returnResponseSuccess(res,"删除成功");
     }
@@ -104,38 +103,5 @@ router.post("/delete",async function(req, res, next){
     }
 });
 
-router.post("/getTree",async function(req, res, next){
-    try {
-        //获取请求的内容对象
-        let query = QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
-
-        let result = await resourceService.findOfTree(query,[query.id],"sort");
-
-        res.send(result);
-    }
-    catch (e)
-    {
-        console.log(e);
-        res.send(new Array());
-    }
-    res.end();
-});
-
-router.post("/selectPageOfTree",async function(req, res, next){
-    try
-    {
-        //获取请求的内容对象
-        let {query,pageQuery} = QueryParamUtil.getQueryParamsPartFields(req,["page","rows"],false);
-
-        let result = await resourceService.findByPageOfTreeOfBase(pageQuery.page,pageQuery.rows,query,"sort");
-        res.send(result);
-    }
-    catch (e)
-    {
-        console.log(e);
-        res.send(new PageUtil());
-    }
-    res.end();
-});
 
 module.exports = router;

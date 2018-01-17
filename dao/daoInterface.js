@@ -28,5 +28,6 @@ let model = {};
 model.userModel = require("../models/userModel");
 model.roleModel = require("../models/roleModel");
 model.resourceModel = require("../models/resourceModel");
+model.backgroundCaseModel = require('../models/backgroundCaseModel');
 
 module.exports = model;

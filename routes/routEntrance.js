@@ -9,6 +9,7 @@ let index = require('../routes/indexRout');
 let users = require('../routes/usersRout');
 let role = require('../routes/roleRout');
 let resource = require("../routes/resourceRout");
+let backgroundCase = require('../routes/backgroundCaseModelRoute');
 
 /**
  * 将路由配置到app
@@ -19,6 +20,7 @@ let routConfigFun = function(app){
     app.use('/user', users);
     app.use('/role', role);
     app.use("/resource",resource);
+    app.use('/backgroundCase',backgroundCase);
 };
 
 module.exports = routConfigFun;

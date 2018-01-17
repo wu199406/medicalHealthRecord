@@ -29,7 +29,7 @@ class BaseTreeService extends BaseService
      */
     async deleteByIdOfBase(id)
     {
-        await super.deleteById(id);//调用父类方法删除文档
+        await super.deleteByIdOfBase(id);//调用父类方法删除文档
 
         if(Array.isArray(id))
         {
@@ -43,7 +43,7 @@ class BaseTreeService extends BaseService
                         return value.id;
                     }
                 });
-                await this.deleteById(newchildrens);//递归删除子节点
+                await this.deleteByIdOfBase(newchildrens);//递归删除子节点
             }
         }
     }

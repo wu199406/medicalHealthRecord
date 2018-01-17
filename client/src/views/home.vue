@@ -1,9 +1,13 @@
 <!--首页的内容-->
 <template>
    <div class="home-content" ref="homeRef">
+
       <!--顶部图片区域-->
       <ImgCarousel></ImgCarousel>
+
+      <!--案例列表-->
       <case-list></case-list>
+
    </div>
 </template>
 

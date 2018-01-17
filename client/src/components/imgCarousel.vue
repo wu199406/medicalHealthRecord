@@ -5,8 +5,8 @@
             <img v-for="(item, index) in imgArray" v-bind:src="item" v-bind:style="{width:componentWidth+'px',height:(componentWidth*imgProportion)+'px',left:(componentWidth*index)+'px',top:'0px'}"/>
         </div>
         <template v-if="imgArray.length>1"><!--使用包装元素-->
-            <div class="imgCarousel-button imgCarousel-left-button iconfont icon-leftjiantou" v-on:click="pictureLeftMove"></div>
-            <div class="imgCarousel-button imgCarousel-right-button iconfont icon-youjiantou" v-on:click="pictureRightMove"></div>
+            <div class="imgCarousel-button imgCarousel-left-button wuiconfont wuicon-left-copy" v-on:click="pictureLeftMove"></div>
+            <div class="imgCarousel-button imgCarousel-right-button wuiconfont wuicon-right-copy" v-on:click="pictureRightMove"></div>
         </template>
     </div>
 </template>

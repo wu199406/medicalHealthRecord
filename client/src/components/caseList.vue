@@ -1,4 +1,6 @@
-<!--案例列表-->
+<!--
+    案例列表:用于首页中的案例列表
+-->
 <template>
     <div class="case-list-content">
         <div class="case-list-title">
@@ -11,7 +13,11 @@
             <div class="case-list-right"></div>
         </div>
         <div class="case-list-action">
-            <div class="case-list-left-shift iconfont icon-leftjiantou" v-on:click="leftShiftHandler"></div><div class="case-list-right-shift iconfont icon-youjiantou" v-on:click="rightShiftHandler"></div>
+            <div class="case-list-left-shift wuiconfont wuicon-left-copy" v-on:click="leftShiftHandler"></div>
+            <router-link class="nav-item" v-bind:to="'/case'">
+                <div class="case-list-info wuiconfont wuicon-liebiao"></div>
+            </router-link>
+            <div class="case-list-right-shift wuiconfont wuicon-right-copy" v-on:click="rightShiftHandler"></div>
         </div>
     </div>
 </template>
@@ -271,10 +277,11 @@
     }
 
     .case-list-action{
-        width: 100%;
+        width: 190px;
         height: 40px;
+        margin: 0px auto;
     }
-    .case-list-left-shift,.case-list-right-shift{
+    .case-list-left-shift,.case-list-right-shift,.case-list-info{
         width: 40px;
         height: 100%;
         display: inline-block;
@@ -283,11 +290,11 @@
         border-radius: 5px;
         margin: 0px 10px;
     }
-    .case-list-left-shift:active,.case-list-right-shift:active{
+    .case-list-left-shift:active,.case-list-right-shift:active,.case-list-info:active{
         background-color: #cccccc;
         color: white;
     }
-    .case-list-left-shift:hover,.case-list-right-shift:hover{
+    .case-list-left-shift:hover,.case-list-right-shift:hover,.case-list-info:hover{
         cursor: pointer;
         box-shadow: 0 0 3px black;
     }
