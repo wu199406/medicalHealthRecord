@@ -57,29 +57,16 @@
             width: 100%;
             border: none;
         }
-        /*.wu-tab-page-tabs>.el-tabs__content>div{*/
-            /*height: 100%;*/
-            /*width: 100%;*/
-            /*position: absolute;*/
-            /*top:0px;*/
-            /*left:0px;*/
-        /*}*/
-        /*.wu-tab-page-tabs>.el-tabs__content>div>div{*/
-            /*height: 100%;*/
-            /*width: 100%;*/
-        /*}*/
-        /*.wu-tab-page-tabs>.el-tabs__content>div>div>iframe{*/
-            /*height: 100%;*/
-            /*width: 100%;*/
-            /*border: none;*/
-        /*}*/
+        .wu-tab-page-tabs .el-tabs__nav-scroll{
+            height: 39px;
+        }
     </style>
 
 </head>
 
 <body>
-    <div id="AppId">
-    </div>
+<div id="AppId">
+</div>
 </body>
 
 <script type="text/javascript" src="/easyui/jquery.min.js" charset="utf-8"></script><!--导入jq文件-->
@@ -188,7 +175,7 @@
             },
             /**
              * NavMenu导航菜单的select事件(即el-menu-item元素的点击事件)的处理器
-             * @param index 
+             * @param index
              * @param indexPath
              */
             clickHandler:function(index,indexPath){
@@ -222,15 +209,7 @@
             var tabEles = [];
             for(var tabData of this.tabs)
             {
-                this.update;
-                if(tabData != null)
-                {
-                    tabEles.push( createElement('el-tab-pane',{props:{label:tabData.name,name:tabData.name,key:tabData.name},attr:{key:tabData.name}},[createElement('iframe',{attrs:{src:tabData.url}})]) );
-                }
-                else
-                {
-                    tabEles.push( createElement('div',{style:{display:'none'}}) );
-                }
+                tabEles.push( createElement('el-tab-pane',{key:tabData.name,props:{label:tabData.name,name:tabData.name}},[createElement('iframe',{attrs:{src:tabData.url}})]) );
             }
 
             var rootEle = createElement('el-tabs',{class:{'wu-tab-page-tabs':true},props:{closable:true,type:'border-card',value:this.selectTabName},on:{'tab-remove':this.deleteTabHandler}},tabEles);
@@ -256,10 +235,8 @@
 
                 if( deleteTabIndex !=null )
                 {
-                    //this.tabs.splice(deleteTabIndex,1);
-                    this.tabs[deleteTabIndex] = null;
-                    this.update = this.update+1;
-                    //this.selectTabName = (this.tabs.length>deleteTabIndex)?(this.tabs[deleteTabIndex].name):(this.tabs.length>0&&this.tabs.length==deleteTabIndex?(this.tabs[deleteTabIndex-1].name):null);
+                    this.tabs.splice(deleteTabIndex,1);
+                    this.selectTabName = (this.tabs.length>deleteTabIndex)?(this.tabs[deleteTabIndex].name):(this.tabs.length>0&&this.tabs.length==deleteTabIndex?(this.tabs[deleteTabIndex-1].name):null);
                 }
             },
             /**
