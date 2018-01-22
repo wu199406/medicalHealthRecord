@@ -28,7 +28,7 @@ class resourceService extends BaseTreeService
     {
         let that = this;
 
-        let childrenTrees = new Array();//创建返回的节点数组
+        let childrenTrees = [];//创建返回的节点数组
 
         let list = null;
 
@@ -58,7 +58,7 @@ class resourceService extends BaseTreeService
                     url:value.url
                 };
 
-                tree.children = await that.findOfTree(tree.id,excludeId);//递归
+                tree.children = await that.findOfTree(tree.id,excludeId,sortField);//递归
 
                 childrenTrees.push(tree);
             }

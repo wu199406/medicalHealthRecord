@@ -17,55 +17,45 @@
             margin: 0px;
         }
 
-        .el-header, .el-footer {
-            background-color: #B3C0D1;
-            color: #333;
-            text-align: center;
+        .wu-el-pagination{
+            padding:5px 2px;
+            background-color: #f5f7fa;
+        }
+        .wu-ae-dialog>.el-dialog__header{
+            background-color: #f5f7fa;
+        }
+        .wu-ae-dialog>.el-dialog__body{
+            padding:10px 20px 0px 20px;
+        }
+        .wu-ae-dialog>.el-dialog__footer{
+            background-color: #f5f7fa;
+            padding-top: 5px;
+            padding-bottom: 5px;
         }
 
-        .el-main {
-            background-color: #E9EEF3;
-            color: #333;
-            text-align: center;
-        }
-
-        .wu-aside-navigation-bar{
-            padding: 3px;
-            box-sizing: content-box;
-            box-shadow: inset 0px 0px 3px 0px #0059b6;
-
-            background-color: #139de4;
-            color: #333;
-            text-align: center;
-        }
-
-        .wu-tab-page-tabs{
-            height: 100%;
+        .wu-el-pagination-refresh{
+            display: inline-block;
+            font-size: 13px;
+            min-width: 35.5px;
+            height: 28px;
+            line-height: 28px;
+            vertical-align: top;
+            -webkit-box-sizing: border-box;
             box-sizing: border-box;
-        }
-        .wu-tab-page-tabs>.el-tabs__content{
-            padding: 2px;
-            height: calc( 100% - 39px);
-            box-sizing: border-box;
-        }
-        .wu-tab-page-tabs>.el-tabs__content>div{
-            height: 100%;
-            width: 100%;
-        }
-        .wu-tab-page-tabs>.el-tabs__content>div>iframe{
-            height: 100%;
-            width: 100%;
-            border: none;
-        }
-        .wu-tab-page-tabs .el-tabs__nav-scroll{
-            height: 39px;
+
+            font-weight: 400;
+            color: #606266;
+            margin-left: 15px;
+            margin-right: 15px;
+
+            cursor: pointer;
         }
     </style>
 
 </head>
 
 <body>
-<div id="AppId">
+<div id="pageId">
 </div>
 </body>
 
@@ -76,239 +66,384 @@
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 
 <script>
-    /**
-     * 创建导航栏组件
-     * 它由NavMenu组件构成
-     */
-    Vue.component("navigation-bar",{
-        render: function (createElement) {
-            var rootEle = createElement('el-menu',{props:{},on:{select:this.clickHandler},style:{'box-shadow':'0 0 2px black'}},this.createElementByTree(this.data,createElement));
+
+    Vue.component('datagrid-page',{
+        render: function(createElement){
+            //创建table-head
+            var tableHeadEle = this.getHeadPanelEle(createElement);
+
+            //创建table
+            var tableEle = this.getTableEle(createElement);
+
+            //创建分页Vnode
+            var paginationEle = this.getPaginationEle(createElement);
+
+            var dialogEle = this.getDialogByAddEdit(createElement);
+
+            var rootEle = createElement('div',{props:{},on:{},style:{width:'100%',height:'100%'}},[tableHeadEle,tableEle,paginationEle,dialogEle]);
             return rootEle;
         },
+        props:['datagridSetting'],
         data:function(){
-            this.getData();
-            return {
-                data:[]
+            var setting =  {
+                url:'',
+                tableHeight:'calc( 100% - 82px)',
+                headSetting:{
+                    getSearchPanel:(createElement)=>{},
+                    getToolPanel:(createElement)=>{
+                        return createElement('div',{style:{width:'100%',padding:'4px 5px',boxSizing:'border-box'}},[
+                            createElement('el-button',{props:{type:'primary',size:'medium'},on:{click:()=>this.openAddDialogHandler()},domProps:{innerHTML:'添加<i class="el-icon-upload el-icon-plus"></i>'}}),
+                        ]);
+                    }
+                },
+                tableSetting:{
+                    fit:true,
+                    stripe:true,//斑马线
+                    border:true,
+                    'row-key':'id',
+                    height:'100%',
+                    size:'medium',
+                    'highlight-current-row':true,//是否要高亮当前行
+                    //'current-row-key':'id',
+                    'header-cell-style':{backgroundColor:'#139de4',color:'white'},
+                    data:[]
+                },
+                paginationSetting:{
+                    layout:"sizes,prev, pager, next,jumper,slot,->,total",
+                    total:20,
+                    currentPage:1,//当前的页码
+                    pageSize:10,//每页的行数
+                    pageSizes:[10,20,50,100,200],
+                    background:true,
+                },
+                column:[],
+                operationRow:{
+                    prop:'caozuo',
+                    label:'操作',
+                    width:'180px',
+                    getScopedSlots: (createElement) => {
+                        return {
+                            default: (props) => {
+                                return [
+                                    createElement('el-button',{props:{type:'primary',size:'small'},on:{click:()=>this.openEditDialogHandler(props.row.id,props.row)},domProps:{innerHTML:'编辑<i class="el-icon-upload el-icon-edit"></i>'}}),
+                                    createElement('el-button',{props:{type:'danger',size:'small'},on:{click:()=>this.deleteHandler(props.row.id,props.row)},domProps:{innerHTML:'删除<i class="el-icon-upload el-icon-delete"></i>'}})
+                                ];
+                            }
+                        }
+                    }
+                },
+                dialogSetting:{
+                    title:'窗口',
+                    visible:false,
+                    width:'600px',
+                    'custom-class':'wu-ae-dialog',
+                    'before-close':(done)=>{done();}
+                },
+                submitHandler:function(){},
+                formRefName:'form',
+                formData:{},
+                getFormEle:(createElement,formData,formRefName)=>{},
+
+                loading:null
             };
+
+            setting = $.extend(true,setting,this.datagridSetting);
+            return setting;
         },
         methods:{
             /**
-             * 远程获取导航栏的导航数据
+             *  获取远程分页的数据内容
              */
             getData:function(){
-                var that = this;
-                $.post('/resource/getTree',{},function(result){
-                    that.data = result;
+                this.openLoadingCom();
+                $.post(this.url,{page:this.currentPage,rows:this.pageSize},(result)=>{
+                    this.closeLoadingCom();
+
+                    this.tableSetting.data = result.rows;
+                    this.paginationSetting.total = result.total;
                 });
             },
             /**
-             * 这是辅助render函数渲染组件,递归渲染
-             * @param {Object[]} data - 要渲染的数据,即远程获取的数据;或者是一个节点的子节点的数据;
-             * @param {Function} createElement - render函数的参数createElement
-             * @param {String} parentIndex  父节点的index字符串
-             * @return {VNode[]}    返回虚拟的vueElement数据
+             * 创建头部
+             * @param createElement
+             * @return {*}
              */
-            createElementByTree:function(data,createElement,parentIndex){
-                var eles = [];
+            getHeadPanelEle:function(createElement){
 
-                if(Array.isArray(data)&&data.length>0)
+                var searchPanelEle = this.headSetting.getSearchPanel(createElement);
+                var toolPanelEle = this.headSetting.getToolPanel(createElement);
+                return createElement('div',{style:{width:'100%'}},[searchPanelEle,toolPanelEle]);
+            },
+            /**
+             * 创建表格
+             * @param createElement
+             * @return {*}
+             */
+            getTableEle:function(createElement){
+                var columnEles =  this.column.map((item,index)=>{
+                    return createElement('el-table-column',{key:item.prop,props:item});
+                });
+                if(this.operationRow != undefined && this.operationRow != null)
                 {
-                    for(var i=0;i<data.length;i++)
+                    columnEles.push(createElement(
+                        'el-table-column',
+                        {
+                            key:this.operationRow.prop,
+                            props:{prop:this.operationRow.prop,label:this.operationRow.label,width:this.operationRow.width},
+                            scopedSlots: this.operationRow.getScopedSlots(createElement)
+                        }
+                    ));
+                }
+                var tableEle = createElement('el-table',{props:this.tableSetting,style:{width:'100%',height:this.tableHeight}},columnEles);
+                return tableEle;
+            },
+            /**
+             * 创建分页栏
+             * @param createElement
+             * @return {*}
+             */
+            getPaginationEle:function(createElement){
+                return createElement('el-pagination',
                     {
-                        var indexStr = ( parentIndex!=undefined && parentIndex!=null ) ? (parentIndex + '-' + i) : String(i);
-                        var ele = null;
-                        var item = data[i];
-
-                        var childrenEles = this.createElementByTree(item.children,createElement,indexStr);
-                        if(childrenEles.length > 0)
-                        {
-                            ele = createElement('el-submenu',{props:{index:indexStr},scopedSlots: {
-                                title: function (props) {
-                                    return createElement('span', item.text);
-                                },
-                            }},childrenEles);
+                        class:['wu-el-pagination'],
+                        props:this.paginationSetting,
+                        on:{
+                            'size-change':(size)=>{this.paginationSetting.pageSize=size;this.getData();},
+                            'current-change':(currentPage)=>{this.paginationSetting.currentPage=currentPage;this.getData();},
                         }
-                        else
-                        {
-                            ele = createElement('el-menu-item',{props:{index:indexStr},domProps:{innerHTML:item.text}});
-                        }
-
-                        eles.push(ele);
+                    },
+                    [createElement('div',{slot:'default',class:'wu-el-pagination-refresh',domProps:{innerHTML:'<i class="el-icon-refresh"></i>刷新'},on:{click:this.getData}})]
+                );
+            },
+            /**
+             * 创建 添加/编辑窗口
+             * @param createElement
+             * @return {*}
+             */
+            getDialogByAddEdit:function(createElement){
+                return createElement('el-dialog',
+                    {
+                        props:this.dialogSetting,on:{close:this.clearForm}
+                    },
+                    [
+                        this.getFormEle(createElement,this.formData,this.formRefName),
+                        createElement('div',{slot:'footer',style:{'background-color':'#f5f7fa'}},[
+                            createElement('el-button',{props:{type:'warning',size:'medium','native-type':'button'},on:{click:()=>{this.$refs[this.formRefName].resetFields();}},domProps:{innerHTML:'重置'}}),
+                            createElement('el-button',{props:{type:'warning',size:'medium','native-type':'button'},on:{click:()=>{this.dialogSetting.visible=false;}},domProps:{innerHTML:'取消'}}),
+                            createElement('el-button',{props:{type:'primary',size:'medium','native-type':'button'},on:{click:this.sumbitFun},domProps:{innerHTML:'保存'}})
+                        ])
+                    ]
+                );
+            },
+            openLoadingCom:function () {
+                this.loading = this.$loading({
+                    lock: true,
+                    text: 'loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.2)'
+                });
+            },
+            closeLoadingCom:function () {
+                this.loading.close();
+            },
+            /**
+             * 打开添加窗口
+             */
+            openAddDialogHandler:function(){
+                this.dialogSetting.visible = true;
+                this.submitHandler = this.addHandler;
+            },
+            /**
+             * 打开编辑窗口
+             * @param id
+             * @param row
+             */
+            openEditDialogHandler:function(id,row){
+                this.dialogSetting.visible = true;
+                this.submitHandler = this.editHandler;
+                this.formData = $.extend(true,{},row);
+            },
+            /**
+             * 清除表单的内容
+             */
+            clearForm:function(){
+                /*for(var name in this.formData)
+                {
+                    this.formData[name] = null;
+                }*/
+                //this.$refs[this.formRefName].clearValidate();
+                this.$refs[this.formRefName].resetFields();
+            },
+            /**
+             * 窗口的保存按钮的点击事件处理器
+             */
+            sumbitFun:function(){
+                //先对表单进行验证
+                this.$refs[this.formRefName].validate((validateResult)=>{
+                    if(validateResult==true)
+                    {
+                        this.submitHandler(this.formData,(flag)=>{
+                            if(flag == true)
+                            {
+                                this.dialogSetting.visible = false;
+                                this.getData();
+                            }
+                        });
                     }
-                }
-
-                return eles;
-            },
-            /**
-             * 根据选中的index获取指向的data中元素的url
-             * @param {String} index - 格式为:number-number...的字符串,这是data数据的路由
-             * @param {Object[]} childrenDatas - data的元素的children的值,用于递归
-             * @return {Object} 返回选中的data中的元素
-             */
-            getUrlBySelectIndex:function(index,childrenDatas){
-                var data = null;
-
-                if(Array.isArray(childrenDatas))
-                {
-                    data = childrenDatas;
-                }
-                else
-                {
-                    data = this.data;
-                }
-
-                var selectRoute = index.split('-');
-
-                if(selectRoute.length == 1)
-                {
-                    return data[ selectRoute[0] ];
-                }
-                else if(selectRoute.length > 1)
-                {
-                    var item = data[ selectRoute.shift() ];
-                    return this.getUrlBySelectIndex(selectRoute.join('-'),(Array.isArray(item.children)?item.children:[]));
-                }
-                else
-                {
-                    return null;
-                }
-            },
-            /**
-             * NavMenu导航菜单的select事件(即el-menu-item元素的点击事件)的处理器
-             * @param index
-             * @param indexPath
-             */
-            clickHandler:function(index,indexPath){
-                var item = this.getUrlBySelectIndex(index);
-                this.openPage(item);
-            },
-            /**
-             * @fires openPage - 触发openPage事件,表示要打开相应的url的页面
-             * @param {Object} item - 要打开的页面的数据对象
-             */
-            openPage:function (item) {
-
-                var url = (item.attributes!=undefined&&item.attributes!=null)?item.attributes.url:'';
-
-                /**
-                 * @event openPage
-                 * @type {object}
-                 * @property {String} name - 要打开的页面的名称
-                 * @property {String} url - 要打开的页面的路径
-                 */
-                this.$emit('openPage',{name:item.text,url:url});
-            }
-        }
-    });
-
-    /**
-     * 使用Tabs显示多个页面的组件
-     */
-    Vue.component('tab-page',{
-        render: function (createElement) {
-            var tabEles = [];
-            for(var tabData of this.tabs)
-            {
-                tabEles.push( createElement('el-tab-pane',{key:tabData.name,props:{label:tabData.name,name:tabData.name}},[createElement('iframe',{attrs:{src:tabData.url}})]) );
-            }
-
-            var rootEle = createElement('el-tabs',{class:{'wu-tab-page-tabs':true},props:{closable:true,type:'border-card',value:this.selectTabName},on:{'tab-remove':this.deleteTabHandler}},tabEles);
-            return rootEle;
-        },
-        props:['newTabPage'],
-        data:function(){
-            return {
-                selectTabName:null,
-                tabs:[],
-                update:0
-            };
-        },
-        methods:{
-            deleteTabHandler:function(tabName){
-                var deleteTabIndex = null;
-                this.tabs.forEach((item,index)=>{
-                    if(item.name == tabName)
+                    else
                     {
-                        deleteTabIndex = index;
+                        this.$alert('请检查输入的内容是否正确', '提示', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
                     }
                 });
-
-                if( deleteTabIndex !=null )
-                {
-                    this.tabs.splice(deleteTabIndex,1);
-                    this.selectTabName = (this.tabs.length>deleteTabIndex)?(this.tabs[deleteTabIndex].name):(this.tabs.length>0&&this.tabs.length==deleteTabIndex?(this.tabs[deleteTabIndex-1].name):null);
-                }
             },
             /**
-             * @param {Object} tabData - 新添加的tab的数据对象
-             * @param {String} tabData.name - 新添加的tab的名称
-             * @param {Sting} tabData.url - 新添加的tab的url
+             * 保存新数据
+             * @param {Object} data - 要保存的数据
+             * @param {Function} callback - 回调函数
              */
-            addTab:function(tabData){
-
-                if(tabData != undefined && tabData != null)
-                {
-                    var isExist = this.tabs.some((item,index)=>{
-                        if(item.name == tabData.name)
-                        {
-                            return true;
-                        }
-                    });
-
-                    if(!isExist)
+            addHandler:function(data,callback){
+                $.post('/backgroundCase/insert',data,(result)=>{
+                    if(result.success!=true)
                     {
-                        this.tabs.push(tabData);
+                        this.$alert('添加失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
                     }
-
-                    this.selectTabName = tabData.name;
-                }
-            }
+                    callback(result.success);
+                },'json');
+            },
+            /**
+             * 保存需要修改的数据
+             * @param {Object} data - 要保存的数据
+             * @param {Function} callback - 回调函数
+             */
+            editHandler:function(data,callback){
+                $.post('/backgroundCase/update',data,(result)=>{
+                    if(result.success!=true)
+                    {
+                        this.$alert('编辑失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                    }
+                    callback(result.success);
+                },'json');
+            },
+            /**
+             * 删除记录
+             * @param id
+             * @param row
+             */
+            deleteHandler:function(id,row){
+                console.log(id);
+            },
         },
-        watch:{
-            newTabPage:function(newValue,oldValue){
-                this.addTab(newValue);
-            }
+        mounted:function(){
+            this.getData();
         }
     });
+
+
+
 
     new Vue({
-        el: '#AppId',
+        el: '#pageId',
         render: function (createElement) {
             return createElement(
                 'el-container', {attrs:{ id:'app'},style:{height:this.height}},
                 [
-                    createElement('el-header',{props:{height:this.headHeight},domProps:{innerHTML:"头部"}}),
                     createElement(
-                        'el-container',
-                        [
-                            createElement('el-aside',{class:{'wu-aside-navigation-bar':true},props:{width:this.asideWidth}},[createElement('navigation-bar',{on:{openPage:this.openPageHandler}})]),
-                            createElement('el-main',{style:{padding:'3px'}},[createElement('tab-page',{props:{newTabPage:this.newTabPage}})])
-                        ]
-                    ),
-                    createElement('el-footer',{props:{height:this.footerHeight}})
+                        'datagrid-page',
+                        {
+                            props:{datagridSetting:this.datagridSetting},
+                        }
+                    )
                 ]
             );
         },
         data:function(){
             return {
                 height: window.innerHeight+'px',
-                headHeight:'80px',
-                footerHeight:'40px',
-                asideWidth:'200px',
+                datagridSetting:{
+                    url:'/backgroundCase/selectPage',
+                    tableSetting:{
+                        data:[]
+                    },
+                    column:[
+                        {prop:'name',label:'名称',width:'100px'},
+                        {prop:'customer',label:'客户名称',width:'100px'},
+                        {prop:'address',label:'地址',width:'150px'},
+                        {prop:'time',label:'项目时间',width:'100px',
+                            formatter:function(row, column, cellValue){
+                            var date = new Date(cellValue);
+                            return date.getFullYear()
+                                +'-'+ (String(date.getMonth()+1).length==1?'0'+(date.getMonth()+1):(date.getMonth()+1))
+                                +'-'+ (String(date.getDate()).length==1?'0'+(date.getDate()):(date.getDate()));
+                        }},
+                        {prop:'size',label:'大小',width:'100px'},
+                        {prop:'describe',label:'描述',width:'150px'}
+                    ],
+                    formData:{
+                        name:'',
+                        customer:'',
+                        address:'',
+                        time:null,
+                        size:'',
+                        describe:''
+                    },
+                    getFormEle:(createElement,formData,formRefName)=>{
+                        var nameEle = createElement('el-form-item',{props:{label:'名称',prop:'name'}},[
+                            createElement('el-input',{
+                                props:{value:formData.name},
+                                on:{change:function(value){formData.name = value;}}
+                            })
+                        ]);
+                        var customer = createElement('el-form-item',{props:{label:'客户名称',prop:'customer'}},[
+                            createElement('el-input',{
+                                props:{value:formData.customer},
+                                on:{change:function(value){formData.customer = value;}}
+                            })
+                        ]);
+                        var address = createElement('el-form-item',{props:{label:'地址',prop:'address'}},[
+                            createElement('el-input',{
+                                props:{value:formData.address},
+                                on:{change:function(value){formData.address = value;}}
+                            })
+                        ]);
+                        var time = createElement('el-form-item',{props:{label:'项目时间',prop:'time'}},[
+                            createElement('el-date-picker',{
+                                props:{value:formData.time,type:'date'},
+                                on:{input:function(value){formData.time = value;}}
+                            })
+                        ]);
+                        var size = createElement('el-form-item',{props:{label:'大小',prop:'size'}},[
+                            createElement('el-input',{
+                                props:{value:formData.size},
+                                on:{change:function(value){formData.size = value;}}
+                            })
+                        ]);
+                        var describe = createElement('el-form-item',{props:{label:'描述',prop:'describe'}},[
+                            createElement('el-input',{
+                                props:{value:formData.describe,type:'textarea',rows:2},
+                                on:{change:function(value){formData.describe = value;}}
+                            })
+                        ]);
 
-                /**
-                 * 添加的新的tab的信息对象
-                 * @property {String} name - 要打开的页面的名称
-                 * @property {String} url - 要打开的页面的路径
-                 */
-                newTabPage:null
+                        var inputEles = [[nameEle,customer],[address],[time,size],[describe]];
+                        var formContentEles = inputEles.map((item,index)=>{
+                            var size = 24 / item.length;
+                            return createElement('el-row',{},item.map((ele,index)=>{
+                                return createElement('el-col',{props:{span:size}},[ele]);
+                            }));
+                        });
+
+                        var ruleArr = {
+                            name:[{required: true, message: '请输入名称', trigger: 'blur'}],
+                            customer:[{required: true, message: '请输入客户名称', trigger: 'blur'}],
+                            address:[{required: true, message: '请输入地址名称', trigger: 'blur'}]
+                        };
+
+                        return createElement('el-form',{props:{model:formData,rules:ruleArr,'status-icon':true,'label-width':'80px'},ref:formRefName},[formContentEles]);
+                    }
+                }
             };
         },
         methods:{
-            openPageHandler:function (object) {
-                console.log('要打开的'+object.name+'页面的路径:'+object.url)
-                this.newTabPage = object;
-            }
         }
     });
 </script>
