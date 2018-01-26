@@ -86,9 +86,9 @@ router.post("/update",async function(req, res, next){
 router.post("/delete",async function(req, res, next){
     try {
         //获取请求的内容对象
-        let queryParam = await QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
+        let queryParam = QueryParamUtil.getQueryParamsMayHasEmpty(req, true);
 
-        let result = userService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
+        let result = await userService.deleteByIdOfBase(JSON.parse(queryParam.idArray));
 
         ResponseUtil.returnResponseSuccess(res,"删除成功");
     }

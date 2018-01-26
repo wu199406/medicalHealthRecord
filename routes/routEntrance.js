@@ -9,6 +9,8 @@ let index = require('../routes/indexRout');
 let users = require('../routes/usersRout');
 let role = require('../routes/roleRout');
 let resource = require("../routes/resourceRout");
+let fileUpload = require("../routes/fileUploadRout");
+
 let backgroundCase = require('../routes/backgroundCaseModelRoute');
 
 /**
@@ -20,6 +22,8 @@ let routConfigFun = function(app){
     app.use('/user', users);
     app.use('/role', role);
     app.use("/resource",resource);
+    app.use('/fileUpload',fileUpload);
+
     app.use('/backgroundCase',backgroundCase);
 };
 

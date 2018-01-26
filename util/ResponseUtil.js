@@ -15,10 +15,11 @@ class ResponseUtil
      * 用于操作成功时返回结果信息
      * @param response  {Express.Response}   Express框架的response对象
      * @param msg   {String}    操作的结果信息
+     * @param obj   {*}         操作结果
      */
-    static returnResponseSuccess(response,msg)
+    static returnResponseSuccess(response,msg,obj=null)
     {
-        let result = new Result(true,msg,null);
+        let result = new Result(true,msg,obj);
         response.send(JSON.stringify(result));
         response.end();
     }

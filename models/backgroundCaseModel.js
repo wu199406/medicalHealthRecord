@@ -15,8 +15,8 @@ let backgroundCaseSchema = new Schema({
     time:{type: Date,default:null},//项目的时间
     size:{type:String,default:null},//大小
     describe:{type:String,default:null},//描述
-    firstFigureL:{type:String,default:null},//首图
-    figureLs:[String],//其他图片
+    firstFigure:{ id: {type:String,default:null}, name: {type:String,default:null} },//首图
+    figures:[{ id: {type:String,default:null}, name: {type:String,default:null} }],//其他图片
     createTime:{type: Date,default:Date.now},//创建时间
 });
 

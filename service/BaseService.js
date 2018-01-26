@@ -80,7 +80,7 @@ class BaseService
 
         query = modelUtil.getPropertyNotNullObject(query);
         let [rows,total] = await Promise.all([
-            this.model.find().where(query).sort({[sortField]:1}).limit(row).skip((page-1)*row).exec(),
+            this.model.find().where(query).sort({[sortField]:-1}).limit(row).skip((page-1)*row).exec(),
             this.model.count(query)
         ]);
         return {rows ,total};
@@ -107,7 +107,8 @@ class BaseService
     async findByIdOfBase(id) {
         if (util.isNotEmptyString(id))
         {
-            return await this.model.findOne({"id": id}).exec();
+            let entity = await this.model.findOne({"id": id}).exec();
+            return entity;
         }
         else
         {

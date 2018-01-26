@@ -14,7 +14,7 @@
         body{
             width:100%;
             height:100%;
-            margin: 0px;
+            margin: 0;
         }
 
         .wu-el-pagination{
@@ -25,7 +25,7 @@
             background-color: #f5f7fa;
         }
         .wu-ae-dialog>.el-dialog__body{
-            padding:10px 20px 0px 20px;
+            padding:10px 20px 0 20px;
         }
         .wu-ae-dialog>.el-dialog__footer{
             background-color: #f5f7fa;
@@ -50,6 +50,31 @@
 
             cursor: pointer;
         }
+
+        .wu-date-picker-form-item>.el-form-item__content>div{
+            width:100%;
+        }
+
+
+        .wu-upload-dialog>.el-dialog__header{
+            background-color: #f5f7fa;
+        }
+        .wu-upload-dialog>.el-dialog__body{
+            padding:0;
+        }
+        .wu-upload-dialog>.el-dialog__footer{
+            background-color: #f5f7fa;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+        .wu-upload-tip{
+            display: inline-block;
+            padding: 0 10px;
+            background-color: #3eb6f4;
+            color: white;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
     </style>
 
 </head>
@@ -70,30 +95,36 @@
     Vue.component('datagrid-page',{
         render: function(createElement){
             //创建table-head
-            var tableHeadEle = this.getHeadPanelEle(createElement);
+            let tableHeadEle = this.getHeadPanelEle(createElement);
 
             //创建table
-            var tableEle = this.getTableEle(createElement);
+            let tableEle = this.getTableEle(createElement);
 
             //创建分页Vnode
-            var paginationEle = this.getPaginationEle(createElement);
+            let paginationEle = this.getPaginationEle(createElement);
 
-            var dialogEle = this.getDialogByAddEdit(createElement);
+            let dialogEle = this.getDialogByAddEdit(createElement);
 
-            var rootEle = createElement('div',{props:{},on:{},style:{width:'100%',height:'100%'}},[tableHeadEle,tableEle,paginationEle,dialogEle]);
-            return rootEle;
+            return createElement('div',{props:{},on:{},style:{width:'100%',height:'100%'}},[tableHeadEle,tableEle,paginationEle,dialogEle]);
         },
         props:['datagridSetting'],
         data:function(){
-            var setting =  {
+            let setting =  {
                 url:'',
                 tableHeight:'calc( 100% - 82px)',
                 headSetting:{
                     getSearchPanel:(createElement)=>{},
                     getToolPanel:(createElement)=>{
-                        return createElement('div',{style:{width:'100%',padding:'4px 5px',boxSizing:'border-box'}},[
-                            createElement('el-button',{props:{type:'primary',size:'medium'},on:{click:()=>this.openAddDialogHandler()},domProps:{innerHTML:'添加<i class="el-icon-upload el-icon-plus"></i>'}}),
-                        ]);
+                        let toolComponents = [
+                            createElement('el-button',{props:{type:'primary',size:'medium'},on:{click:this.openAddDialogHandler},domProps:{innerHTML:'添加<i class="el-icon-plus"></i>'}}),
+                            createElement('el-button',{props:{type:'danger',size:'medium'},on:{click:this.deleteHandler},domProps:{innerHTML:'删除<i class="el-icon-delete"></i>'}}),
+                        ];
+                        let additionalToolComponents = this.$scopedSlots.tool(this.selectedRow);
+                        if(additionalToolComponents!=undefined&&additionalToolComponents!=null)
+                        {
+                            toolComponents.push(additionalToolComponents);
+                        }
+                        return createElement('div',{style:{width:'100%',padding:'4px 5px',boxSizing:'border-box'}},toolComponents);
                     }
                 },
                 tableSetting:{
@@ -125,8 +156,8 @@
                         return {
                             default: (props) => {
                                 return [
-                                    createElement('el-button',{props:{type:'primary',size:'small'},on:{click:()=>this.openEditDialogHandler(props.row.id,props.row)},domProps:{innerHTML:'编辑<i class="el-icon-upload el-icon-edit"></i>'}}),
-                                    createElement('el-button',{props:{type:'danger',size:'small'},on:{click:()=>this.deleteHandler(props.row.id,props.row)},domProps:{innerHTML:'删除<i class="el-icon-upload el-icon-delete"></i>'}})
+                                    createElement('el-button',{props:{type:'primary',size:'small'},on:{click:()=>this.openEditDialogHandler(props.row.id,props.row)},domProps:{innerHTML:'编辑<i class="el-icon-edit"></i>'}}),
+                                    createElement('el-button',{props:{type:'danger',size:'small'},on:{click:()=>this.deleteHandler(props.row.id,props.row)},domProps:{innerHTML:'删除<i class="el-icon-delete"></i>'}})
                                 ];
                             }
                         }
@@ -137,17 +168,27 @@
                     visible:false,
                     width:'600px',
                     'custom-class':'wu-ae-dialog',
-                    'before-close':(done)=>{done();}
+                    'before-close':(done)=>{this.dialogSetting.visible=false;done();}
                 },
                 submitHandler:function(){},
                 formRefName:'form',
                 formData:{},
-                getFormEle:(createElement,formData,formRefName)=>{},
+                rules:{},
+                getDialogContentEle:(createElement,formData,rules,formRefName)=>{},
 
-                loading:null
+                /**
+                 * loading组件
+                 */
+                loading:null,
+                /**
+                 * 勾选的行
+                 */
+                selectedRow:[],
             };
 
             setting = $.extend(true,setting,this.datagridSetting);
+            setting.formData = this.datagridSetting.formData;
+
             return setting;
         },
         methods:{
@@ -156,7 +197,7 @@
              */
             getData:function(){
                 this.openLoadingCom();
-                $.post(this.url,{page:this.currentPage,rows:this.pageSize},(result)=>{
+                $.post(this.url,{page:this.paginationSetting.currentPage,rows:this.paginationSetting.pageSize},(result)=>{
                     this.closeLoadingCom();
 
                     this.tableSetting.data = result.rows;
@@ -170,8 +211,8 @@
              */
             getHeadPanelEle:function(createElement){
 
-                var searchPanelEle = this.headSetting.getSearchPanel(createElement);
-                var toolPanelEle = this.headSetting.getToolPanel(createElement);
+                let searchPanelEle = this.headSetting.getSearchPanel(createElement);
+                let toolPanelEle = this.headSetting.getToolPanel(createElement);
                 return createElement('div',{style:{width:'100%'}},[searchPanelEle,toolPanelEle]);
             },
             /**
@@ -180,10 +221,11 @@
              * @return {*}
              */
             getTableEle:function(createElement){
-                var columnEles =  this.column.map((item,index)=>{
+                let columnEles =  this.column.map((item,index)=>{
                     return createElement('el-table-column',{key:item.prop,props:item});
                 });
-                if(this.operationRow != undefined && this.operationRow != null)
+                columnEles.unshift(createElement('el-table-column',{props:{type:'selection',width:'35px'}}));
+                if(this.operationRow !== undefined && this.operationRow !== null)
                 {
                     columnEles.push(createElement(
                         'el-table-column',
@@ -194,8 +236,7 @@
                         }
                     ));
                 }
-                var tableEle = createElement('el-table',{props:this.tableSetting,style:{width:'100%',height:this.tableHeight}},columnEles);
-                return tableEle;
+                return createElement('el-table',{props:this.tableSetting,style:{width:'100%',height:this.tableHeight},on:{'selection-change':(value)=>{this.selectedRow = value;}}},columnEles);
             },
             /**
              * 创建分页栏
@@ -205,14 +246,14 @@
             getPaginationEle:function(createElement){
                 return createElement('el-pagination',
                     {
-                        class:['wu-el-pagination'],
+                        'class':['wu-el-pagination'],
                         props:this.paginationSetting,
                         on:{
                             'size-change':(size)=>{this.paginationSetting.pageSize=size;this.getData();},
                             'current-change':(currentPage)=>{this.paginationSetting.currentPage=currentPage;this.getData();},
                         }
                     },
-                    [createElement('div',{slot:'default',class:'wu-el-pagination-refresh',domProps:{innerHTML:'<i class="el-icon-refresh"></i>刷新'},on:{click:this.getData}})]
+                    [createElement('div',{slot:'default','class':'wu-el-pagination-refresh',domProps:{innerHTML:'<i class="el-icon-refresh"></i>刷新'},on:{click:this.getData}})]
                 );
             },
             /**
@@ -226,15 +267,17 @@
                         props:this.dialogSetting,on:{close:this.clearForm}
                     },
                     [
-                        this.getFormEle(createElement,this.formData,this.formRefName),
+                        this.getDialogContentEle(createElement,this.formData,this.rules,this.formRefName),
                         createElement('div',{slot:'footer',style:{'background-color':'#f5f7fa'}},[
-                            createElement('el-button',{props:{type:'warning',size:'medium','native-type':'button'},on:{click:()=>{this.$refs[this.formRefName].resetFields();}},domProps:{innerHTML:'重置'}}),
                             createElement('el-button',{props:{type:'warning',size:'medium','native-type':'button'},on:{click:()=>{this.dialogSetting.visible=false;}},domProps:{innerHTML:'取消'}}),
                             createElement('el-button',{props:{type:'primary',size:'medium','native-type':'button'},on:{click:this.sumbitFun},domProps:{innerHTML:'保存'}})
                         ])
                     ]
                 );
             },
+            /**
+             * 打开加载提示
+             */
             openLoadingCom:function () {
                 this.loading = this.$loading({
                     lock: true,
@@ -243,6 +286,9 @@
                     background: 'rgba(0, 0, 0, 0.2)'
                 });
             },
+            /**
+             * 关闭加载提示
+             */
             closeLoadingCom:function () {
                 this.loading.close();
             },
@@ -250,6 +296,7 @@
              * 打开添加窗口
              */
             openAddDialogHandler:function(){
+                this.dialogSetting.title = '添加窗口';
                 this.dialogSetting.visible = true;
                 this.submitHandler = this.addHandler;
             },
@@ -259,20 +306,24 @@
              * @param row
              */
             openEditDialogHandler:function(id,row){
+                this.dialogSetting.title = '编辑窗口';
                 this.dialogSetting.visible = true;
                 this.submitHandler = this.editHandler;
-                this.formData = $.extend(true,{},row);
+
+                for(let name in this.formData)
+                {
+                    this.formData[name] = (row[name]==undefined)?null:row[name];
+                }
             },
             /**
              * 清除表单的内容
              */
             clearForm:function(){
-                /*for(var name in this.formData)
+                for(let name in this.formData)
                 {
                     this.formData[name] = null;
-                }*/
-                //this.$refs[this.formRefName].clearValidate();
-                this.$refs[this.formRefName].resetFields();
+                }
+                this.$refs[this.formRefName].clearValidate();
             },
             /**
              * 窗口的保存按钮的点击事件处理器
@@ -280,10 +331,12 @@
             sumbitFun:function(){
                 //先对表单进行验证
                 this.$refs[this.formRefName].validate((validateResult)=>{
-                    if(validateResult==true)
+                    if(validateResult===true)
                     {
+                        this.openLoadingCom();
                         this.submitHandler(this.formData,(flag)=>{
-                            if(flag == true)
+                            this.closeLoadingCom();
+                            if(flag === true)
                             {
                                 this.dialogSetting.visible = false;
                                 this.getData();
@@ -302,13 +355,20 @@
              * @param {Function} callback - 回调函数
              */
             addHandler:function(data,callback){
-                $.post('/backgroundCase/insert',data,(result)=>{
-                    if(result.success!=true)
-                    {
-                        this.$alert('添加失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                $.ajax({
+                    url:'/backgroundCase/insert',
+                    type:'post',
+                    contentType:'application/json',
+                    data:JSON.stringify(data),
+                    dataType:'json',
+                    success:function(result){
+                        if(result.success!=true)
+                        {
+                            this.$alert('添加失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                        }
+                        callback(result.success);
                     }
-                    callback(result.success);
-                },'json');
+                });
             },
             /**
              * 保存需要修改的数据
@@ -316,13 +376,20 @@
              * @param {Function} callback - 回调函数
              */
             editHandler:function(data,callback){
-                $.post('/backgroundCase/update',data,(result)=>{
-                    if(result.success!=true)
-                    {
-                        this.$alert('编辑失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                $.ajax({
+                    url:'/backgroundCase/update',
+                    type:'post',
+                    contentType:'application/json',
+                    data:JSON.stringify(data),
+                    dataType:'json',
+                    success:function(result){
+                        if(result.success!=true)
+                        {
+                            this.$alert('编辑失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                        }
+                        callback(result.success);
                     }
-                    callback(result.success);
-                },'json');
+                });
             },
             /**
              * 删除记录
@@ -330,7 +397,42 @@
              * @param row
              */
             deleteHandler:function(id,row){
-                console.log(id);
+                var idArray = [];
+                if(Object.prototype.toString.call(id).slice(8,-1) == 'String' && id.trim()!='')
+                {
+                    idArray.push(id);
+                }
+                else if( Array.isArray(this.selectedRow) )
+                {
+                    idArray = this.selectedRow.map((item,index)=>{return item.id;});
+                }
+
+                if(Array.isArray(idArray)&&idArray.length>0)
+                {
+                    this.$confirm('确定删除选中的行', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'info'
+                    }).then(()=>{
+                        this.openLoadingCom();
+                        $.post('/backgroundCase/delete',{idArray:JSON.stringify(idArray)},(result)=>{
+                            if(result.success!=true)
+                            {
+                                this.$alert('删除失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                            }
+                            else
+                            {
+                                this.$alert('删除成功', '提示', {confirmButtonText: '确定',type:'success',callback:()=>{}});
+                                this.getData();
+                            }
+                            this.closeLoadingCom();
+                        },'json');
+                    }).catch(()=>{});
+                }
+                else
+                {
+                    this.$alert('请先勾选需要删除的行', '提示', {confirmButtonText: '确定',type:'info',callback:()=>{}});
+                }
             },
         },
         mounted:function(){
@@ -340,6 +442,190 @@
 
 
 
+    Vue.component('wu-file-upload-dialog',{
+        render:function(createElement){
+            return createElement('el-dialog',
+                {props:{width:'800px',title:this.title,visible:this.visible,'custom-class':'wu-upload-dialog'},on:{open:this.openUploadDialogHandler}},
+                [
+                    createElement('el-tabs',{props:{type:'border-card'}},
+                        [
+                            createElement('el-tab-pane',{props:{label:'首图上传管理'},style:{height:'260px'}},[
+                                createElement('div',{props:{},class:{'wu-upload-tip':true},domProps:{innerHTML:'上传首图,只需要上传一张即可'}}),
+                                createElement('el-upload',
+                                    {
+                                        props:{
+                                            action:'/backgroundCase/uploadFirstFigure',
+                                            listType:'picture-card',
+                                            'file-list':this.fileListOfFirst,
+                                            multiple:false,
+                                            limit:1,
+                                            name:'firstFigure',
+                                            data:{id:this.id},
+                                            'on-exceed':this.exceedHandler,
+                                            'before-remove':(file, fileList)=>{this.removeHandler(1,file, fileList);}
+                                        },
+                                        ref:this.firstFigureRefName
+                                    },
+                                    [
+                                        createElement('el-button',{props:{size:'small',type:'primary'},domProps:{innerHTML:'点击上传'}})
+                                    ]
+                                ),
+                            ]),
+                            createElement('el-tab-pane',{props:{label:'其他图片上传管理'},style:{height:'260px',overflow:'auto'}},[
+                                createElement('el-upload',
+                                    {
+                                        props:{
+                                            action:'/backgroundCase/uploadFigures',
+                                            listType:'text',
+                                            'file-list':this.figures,
+                                            multiple:true,
+                                            //limit:0,
+                                            name:'figures',
+                                            data:{id:this.id},
+                                            'before-remove':(file, fileList)=>{this.removeHandler(2,file, fileList);}
+                                        },
+                                        ref:this.figureLsRefName
+                                    },
+                                    [
+                                        createElement('el-button',{props:{size:'small',type:'primary'},domProps:{innerHTML:'点击上传'}})
+                                    ]
+                                ),
+                            ])
+                        ]
+                    ),
+                    createElement('div',{slot:'footer',style:{'background-color':'#f5f7fa'}},[
+                        createElement('el-button',{props:{type:'warning',size:'medium','native-type':'button'},on:{click:()=>{this.onCloseUploadDialog();}},domProps:{innerHTML:'关闭'}}),
+                    ])
+                ]
+            );
+        },
+        name:'wuFileUpload',
+        props:['id','visible'],
+        data:function(){
+            return {
+                firstFigureRefName:'firstFigureRef',
+                figureLsRefName:'figureLsRef',
+
+                title:'图片上传窗口',
+
+                firstFigure:null,
+                figures:[]
+            };
+        },
+        methods:{
+            /**
+             * 文件超出个数限制时的钩子
+             * @param files
+             * @param fileList
+             */
+            exceedHandler(files, fileList){
+                this.$alert('只需要上传一张首图', '提示', {confirmButtonText: '确定',type:'info',callback:()=>{}});
+            },
+            /**
+             * 删除文件之前的钩子
+             * @param {Number} type - 1:表示首图的删除;2:表示其他图片的删除;
+             * @param file  删除的文件的信息
+             * @param fileList
+             */
+            removeHandler(type,file, fileList){
+                let id = (file.id!=undefined&&file.id!=null)?file.id:file.response.obj.id;
+                let url = '',data={};
+                if( type == 1 )
+                {
+                    url = '/backgroundCase/deleteFirstFigure';
+                    data = {id:this.id,firstFigureId:id};
+                }
+                else
+                {
+                    url = '/backgroundCase/deleteFigures';
+                    data = {id:this.id,figureId:id};
+                }
+                return new Promise((resolve, reject)=>{
+                    $.post(url,data,(result)=>{
+                        if(result.success!=true)
+                        {
+                            this.$alert('删除失败', '警告', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                            reject(false);
+                        }
+                        else
+                        {
+                            resolve(true);
+                        }
+                    },'json');
+                });
+            },
+            successHandler(response, file, fileList){},
+            /**
+             * 上传窗口打开的事件处理程序
+             */
+            openUploadDialogHandler:function(){
+                this.getBackgroundCaseInfoById();
+            },
+            /**
+             * @fires closeUploadDialog 触发上传窗口关闭事件
+             */
+            onCloseUploadDialog:function () {
+
+                this.firstFigure = null;
+                this.figures = [];
+                /**
+                 * @event closeUploadDialog
+                 */
+                this.$emit('closeUploadDialog');
+            },
+            /**
+             * 根据id获取背景信息对象
+             */
+            getBackgroundCaseInfoById:function(){
+                $.post('/backgroundCase/findById',{id:this.id},(result)=>{
+                    if(result.success==true)
+                    {
+                        if(result.obj!=undefined&&result.obj!=null)
+                        {
+                            if(result.obj.firstFigure!=undefined&&result.obj.firstFigure!=null)
+                            {
+                                this.firstFigure = {id:result.obj.firstFigure.id,name:result.obj.firstFigure.name};
+                            }
+                            if(Array.isArray(result.obj.figures))
+                            {
+                                this.figures = result.obj.figures;
+                                //console.log(this.figures)
+                            }
+                        }
+                    }
+                },'json');
+            }
+        },
+        computed:{
+            fileListOfFirst(){
+                if(Object.prototype.toString.call(this.firstFigure).slice(8,-1) == 'Object' && Object.prototype.toString.call(this.firstFigure.id).slice(8,-1) == 'String' && this.firstFigure.id.length>0)
+                {
+                    let id = this.firstFigure.id,name=this.firstFigure.name;
+                    let fileListOfFirstList = [{
+                        id:id,
+                        name:name,
+                        url:'/fileUpload/down?id='+ id
+                    }];
+                    return fileListOfFirstList;
+                }
+                return [];
+            },
+            figureList(){
+                //console.log(this.figures)
+                if(Array.isArray(this.figures))
+                {
+                    return this.figures.map((item)=>{
+                        return {
+                            id:item.id,
+                            name:item.name,
+                            url:'/fileUpload/down?id='+ item.id
+                        };
+                    });
+                }
+                return [];
+            }
+        }
+    });
 
     new Vue({
         el: '#pageId',
@@ -347,12 +633,14 @@
             return createElement(
                 'el-container', {attrs:{ id:'app'},style:{height:this.height}},
                 [
-                    createElement(
-                        'datagrid-page',
-                        {
-                            props:{datagridSetting:this.datagridSetting},
-                        }
-                    )
+                    createElement('datagrid-page',{props:{datagridSetting:this.datagridSetting},
+                        scopedSlots: {
+                            tool: (props)=>{
+                                return  createElement('el-button',{props:{type:'primary',size:'medium'},on:{click:()=>{this.openFileUploadDialogFun(props)}},domProps:{innerHTML:'上传图片<i class="el-icon-upload"></i>'}});
+                            }
+                        }}
+                    ),
+                    createElement('wu-file-upload-dialog',{props:{id:this.uploadDialogSetting.id,visible:this.uploadDialogSetting.visible},on:{closeUploadDialog:()=>{this.uploadDialogSetting.visible=false;}}})
                 ]
             );
         },
@@ -370,15 +658,19 @@
                         {prop:'address',label:'地址',width:'150px'},
                         {prop:'time',label:'项目时间',width:'100px',
                             formatter:function(row, column, cellValue){
-                            var date = new Date(cellValue);
-                            return date.getFullYear()
-                                +'-'+ (String(date.getMonth()+1).length==1?'0'+(date.getMonth()+1):(date.getMonth()+1))
-                                +'-'+ (String(date.getDate()).length==1?'0'+(date.getDate()):(date.getDate()));
+                                if(cellValue!=undefined&&cellValue!=null)
+                                {
+                                    var date = new Date(cellValue);
+                                    return date.getFullYear()
+                                        +'-'+ (String(date.getMonth()+1).length==1?'0'+(date.getMonth()+1):(date.getMonth()+1))
+                                        +'-'+ (String(date.getDate()).length==1?'0'+(date.getDate()):(date.getDate()));
+                                }
                         }},
                         {prop:'size',label:'大小',width:'100px'},
                         {prop:'describe',label:'描述',width:'150px'}
                     ],
                     formData:{
+                        id:'',
                         name:'',
                         customer:'',
                         address:'',
@@ -386,7 +678,7 @@
                         size:'',
                         describe:''
                     },
-                    getFormEle:(createElement,formData,formRefName)=>{
+                    getDialogContentEle:(createElement,formData,rules,formRefName)=>{
                         var nameEle = createElement('el-form-item',{props:{label:'名称',prop:'name'}},[
                             createElement('el-input',{
                                 props:{value:formData.name},
@@ -405,7 +697,7 @@
                                 on:{change:function(value){formData.address = value;}}
                             })
                         ]);
-                        var time = createElement('el-form-item',{props:{label:'项目时间',prop:'time'}},[
+                        var time = createElement('el-form-item',{props:{label:'项目时间',prop:'time'},class:{'wu-date-picker-form-item':true}},[
                             createElement('el-date-picker',{
                                 props:{value:formData.time,type:'date'},
                                 on:{input:function(value){formData.time = value;}}
@@ -423,27 +715,49 @@
                                 on:{change:function(value){formData.describe = value;}}
                             })
                         ]);
-
-                        var inputEles = [[nameEle,customer],[address],[time,size],[describe]];
+                        [nameEle,customer]
+                        var inputEles = [[{ele:nameEle,size:12},{ele:customer,size:12}],[{ele:address,size:24}],[{ele:time,size:12},{ele:size,size:12}],[{ele:describe,size:24}]];
                         var formContentEles = inputEles.map((item,index)=>{
-                            var size = 24 / item.length;
-                            return createElement('el-row',{},item.map((ele,index)=>{
-                                return createElement('el-col',{props:{span:size}},[ele]);
+                            return createElement('el-row',{},item.map((item,index)=>{
+                                return createElement('el-col',{props:{span:item.size}},[item.ele]);
                             }));
                         });
 
-                        var ruleArr = {
-                            name:[{required: true, message: '请输入名称', trigger: 'blur'}],
-                            customer:[{required: true, message: '请输入客户名称', trigger: 'blur'}],
-                            address:[{required: true, message: '请输入地址名称', trigger: 'blur'}]
-                        };
-
-                        return createElement('el-form',{props:{model:formData,rules:ruleArr,'status-icon':true,'label-width':'80px'},ref:formRefName},[formContentEles]);
+                        return createElement('div',{style:{width:'100%',height:'100%'}},[
+                            createElement('el-form',{props:{model:formData,rules:rules,'status-icon':true,'label-width':'80px'},ref:formRefName},[formContentEles])
+                        ]);
+                    },
+                    rules:{
+                        name:[{required: true, message: '请输入名称', trigger: 'blur'}],
+                        customer:[{required: true, message: '请输入客户名称', trigger: 'blur'}],
+                        address:[{required: true, message: '请输入地址名称', trigger: 'blur'}]
                     }
+                },
+                uploadDialogSetting:{
+                    visible:false,
+                    id:null
                 }
             };
         },
         methods:{
+            openFileUploadDialogFun(selectedRow){
+                if(Array.isArray(selectedRow))
+                {
+                    if(selectedRow.length===1)
+                    {
+                        this.uploadDialogSetting.visible = true;
+                        this.uploadDialogSetting.id = selectedRow[0].id;
+                    }
+                    else
+                    {
+                        this.$alert('必选且只能选择一行', '提示', {confirmButtonText: '确定',type:'warning',callback:()=>{}});
+                    }
+                }
+                else
+                {
+                    this.$alert('系统错误', '异常', {confirmButtonText: '确定',type:'error',callback:()=>{}});
+                }
+            }
         }
     });
 </script>
