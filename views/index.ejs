@@ -14,7 +14,7 @@
     body{
       width:100%;
       height:100%;
-      margin: 0px;
+      margin: 0;
     }
 
     .el-header, .el-footer {
@@ -32,7 +32,7 @@
     .wu-aside-navigation-bar{
       padding: 3px;
       box-sizing: content-box;
-      box-shadow: inset 0px 0px 3px 0px #0059b6;
+      box-shadow: inset 0 0 3px 0 #0059b6;
 
       background-color: #139de4;
       color: #333;
@@ -82,8 +82,7 @@
      */
     Vue.component("navigation-bar",{
         render: function (createElement) {
-            var rootEle = createElement('el-menu',{props:{},on:{select:this.clickHandler},style:{'box-shadow':'0 0 2px black'}},this.createElementByTree(this.data,createElement));
-            return rootEle;
+            return createElement('el-menu',{props:{},on:{select:this.clickHandler},style:{'box-shadow':'0 0 2px black'}},this.createElementByTree(this.data,createElement));
         },
         data:function(){
             this.getData();
@@ -96,7 +95,7 @@
              * 远程获取导航栏的导航数据
              */
             getData:function(){
-                var that = this;
+                let that = this;
                 $.post('/resource/getTree',{},function(result){
                     that.data = result;
                 });
@@ -109,24 +108,21 @@
              * @return {VNode[]}    返回虚拟的vueElement数据
              */
             createElementByTree:function(data,createElement,parentIndex){
-                var eles = [];
+                let eles = [];
 
                 if(Array.isArray(data)&&data.length>0)
                 {
-                    for(var i=0;i<data.length;i++)
+                    for(let i=0;i<data.length;i++)
                     {
-                        var indexStr = ( parentIndex!=undefined && parentIndex!=null ) ? (parentIndex + '-' + i) : String(i);
-                        var ele = null;
-                        var item = data[i];
+                        let indexStr = ( parentIndex!==undefined && parentIndex!==null ) ? (parentIndex + '-' + i) : String(i);
+                        let ele = null;
+                        let item = data[i];
 
-                        var childrenEles = this.createElementByTree(item.children,createElement,indexStr);
+                        let childrenEles = this.createElementByTree(item.children,createElement,indexStr);
                         if(childrenEles.length > 0)
                         {
-                            ele = createElement('el-submenu',{props:{index:indexStr},scopedSlots: {
-                                title: function (props) {
-                                    return createElement('span', item.text);
-                                },
-                            }},childrenEles);
+                            childrenEles.push(createElement('span',{domProps:{innerHTML:item.text},slot:'title'}));
+                            ele = createElement('el-submenu',{props:{index:indexStr,title:item.text}},childrenEles);
                         }
                         else
                         {

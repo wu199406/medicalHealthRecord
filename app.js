@@ -6,6 +6,8 @@ let cookieParser = require('cookie-parser');//提供从请求读取cookie和在�
 let session = require("express-session");//提供session功能
 let bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
 
+let securityManage = require('./component/permissions/index');
+
 //引入数据库接口，启动mongodb数据库
 let dao = require("./dao/daoInterface.js");
 
@@ -32,6 +34,11 @@ app.use(session({
 
 app.use(express.static(path.join(__dirname, 'public')));//管理静态文件
 
+//配置权限拦截器中间件
+app.use(function (req, res, next) {
+    securityManage.filterProcessor(req, res, next);
+});
+
 //调用路由入口配置函数，配置路由
 routEntrance(app);
 
@@ -45,6 +52,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+    console.log(err)
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

@@ -58,6 +58,7 @@
 
         .wu-upload-dialog>.el-dialog__header{
             background-color: #f5f7fa;
+            display: none;
         }
         .wu-upload-dialog>.el-dialog__body{
             padding:0;
@@ -111,7 +112,6 @@
         data:function(){
             let setting =  {
                 url:'',
-                tableHeight:'calc( 100% - 82px)',
                 headSetting:{
                     getSearchPanel:(createElement)=>{},
                     getToolPanel:(createElement)=>{
@@ -132,7 +132,7 @@
                     stripe:true,//斑马线
                     border:true,
                     'row-key':'id',
-                    height:'100%',
+                    height:'calc( 100% - 82px )',
                     size:'medium',
                     'highlight-current-row':true,//是否要高亮当前行
                     //'current-row-key':'id',
@@ -236,7 +236,7 @@
                         }
                     ));
                 }
-                return createElement('el-table',{props:this.tableSetting,style:{width:'100%',height:this.tableHeight},on:{'selection-change':(value)=>{this.selectedRow = value;}}},columnEles);
+                return createElement('el-table',{props:this.tableSetting,on:{'selection-change':(value)=>{this.selectedRow = value;}}},columnEles);
             },
             /**
              * 创建分页栏

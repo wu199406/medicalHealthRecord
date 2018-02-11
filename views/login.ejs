@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <% include base/relyOn.ejs %><!--设置meta和导入依赖-->
+        <title>登录页面</title>
+    </head>
+    <script type="text/javascript">
+
+    </script>
+    <body>
+
+        <form action="/login" method="post">
+            <label for="userName">用户名称:</label>
+            <input type="text" name="userName">
+            <label for="passWord">密码:</label>
+            <input type="password" name="passWord">
+            <button type="submit">登录</button>
+        </form>
+
+    </body>
+</html>
