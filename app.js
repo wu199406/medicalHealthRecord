@@ -6,10 +6,11 @@ let cookieParser = require('cookie-parser');//提供从请求读取cookie和在�
 let session = require("express-session");//提供session功能
 let bodyParser = require('body-parser');//提供了将post请求的正文中的json数据解释为req.body属性
 
-let securityManage = require('./component/permissions/index');
-
 //引入数据库接口，启动mongodb数据库
 let dao = require("./dao/daoInterface.js");
+
+//引入权限管理器--由于使用了自定义的使用mongoose的realm,因此数据库的连接必须在前面
+let securityManage = require('./realize/permissions/index');
 
 //引入路由入口模块
 let routEntrance = require("./routes/routEntrance");
@@ -52,7 +53,6 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-    console.log(err)
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

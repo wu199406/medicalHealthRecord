@@ -40,9 +40,9 @@ class PermissionManage {
      * @param {String} password - 用户密码
      * @return {Object} 验证成功:返回用户信息对象，否则返回null
      */
-    authentication(username,password){
+    async authentication(username,password){
         //获取身份信息
-        let userInfo = this.realm.doGetAuthenticationInfo(username);
+        let userInfo = await this.realm.doGetAuthenticationInfo(username);
 
         if(userInfo.passWord === password) {
             //进行身份验证
@@ -54,16 +54,16 @@ class PermissionManage {
     }
 
     /**
-     * 进行权限判断
+     * 进行权限判断,判断用户是否拥有targetResource(目标资源)的权限
      * @param {Session} session - 当前的回话信息对象
      * @param {String} targetResource - 目标资源/需要的权限
      * @return {Boolean} 具有相应的权限,返回true,否则返回false
      */
-    authorization(session,targetResource){
+    async authorization(session,targetResource){
         let userId = session.userInfo.id;
 
         //获取需要授权的资源的数组
-        let ChainDefinitionSection = this.getChainDefinitionSection(userId);
+        let ChainDefinitionSection = await this.getChainDefinitionSection(userId);
         //判断当前请求的资源是否被拦截
         let isFilterUrl = ChainDefinitionSection.some((item,index)=>{
             if(targetResource.indexOf(item) !== -1){
@@ -74,7 +74,7 @@ class PermissionManage {
         //如果需要拦截
         if(isFilterUrl === true) {
             //获取当前用户拥有的权限
-            let authorizationInfo = this.getAuthorization(userId);
+            let authorizationInfo = await this.getAuthorization(userId);
             //判断用户是否拥有请求的资源的权限
             return authorizationInfo.some((item,index)=>{
                 if(targetResource.indexOf(item) !== -1){
@@ -93,14 +93,14 @@ class PermissionManage {
      * @param {String} userId - 用户id
      * @return {Array.<string>} 返回用户的权限信息对象
      */
-    getAuthorization(userId){
+    async getAuthorization(userId){
         let oldAuthorizationInfo = this.cacheManage.get(userId+'-author',this.cacheType);
 
         if(oldAuthorizationInfo !== undefined && oldAuthorizationInfo !== null){
             return oldAuthorizationInfo;
         }
         else {
-            let newAuthorizationInfo = this.realm.doGetAuthorizationInfo(userId);
+            let newAuthorizationInfo = await this.realm.doGetAuthorizationInfo(userId);
             this.cacheManage.set(userId+'-author',newAuthorizationInfo,this.cacheType);
             return newAuthorizationInfo;
         }
@@ -113,14 +113,14 @@ class PermissionManage {
      * @param {String} userId - 用户id
      * @return {Array.<string>} 返回需要授权的资源的数据
      */
-    getChainDefinitionSection(userId){
+    async getChainDefinitionSection(userId){
         let oldChainDefinitionSection = this.cacheManage.get(userId+'-cds',this.cacheType);
 
         if(oldChainDefinitionSection !== undefined && oldChainDefinitionSection !== null){
             return oldChainDefinitionSection;
         }
         else{
-            let newChainDefinitionSection = this.realm.doGetChainDefinitionSection(userId);//通过realm获取数据
+            let newChainDefinitionSection = await this.realm.doGetChainDefinitionSection(userId);//通过realm获取数据
             this.cacheManage.set(userId+'-cds',newChainDefinitionSection,this.cacheType);//缓存数据
             return newChainDefinitionSection;
         }
@@ -129,35 +129,34 @@ class PermissionManage {
 }
 
 /**
+ * @interface
  * 数据领域，用于获取身份验证信息和授权信息
  */
 class Realm{
     /**
+     * @abstract
      * 获取身份验证信息
      * @param {String} username - 用户名称
-     * @return {Object} 返回用户信息对象
+     * @return {Object} 返回用户信息对象。如果匹配username的文档只有一个时，就返回该model；否则大于一个或者小于一个文档时都返回null。
+     * @throws {Error} 如果参数username不是非空字符串就抛出异常。
      */
-    doGetAuthenticationInfo(username){
-        return {userName:'123',passWord:'123'};
-    }
+    async doGetAuthenticationInfo(username){}
 
     /**
+     * @abstract
      * 获取授权信息
      * @param {String} userId - 用户id
      * @return {Array.<string>} 返回用户的权限信息对象
      */
-    doGetAuthorizationInfo(userId){
-        return ['index'];
-    }
+    async doGetAuthorizationInfo(userId){}
 
     /**
+     * @abstract
      * 获取需要授权的资源的信息
      * @param {String} userId - 用户id
      * @return {Array.<string>} 返回需要授权的资源的数据
      */
-    doGetChainDefinitionSection(userId){
-        return ['index'];
-    }
+    async doGetChainDefinitionSection(userId){}
 }
 
 module.exports = {PermissionManage, Realm};

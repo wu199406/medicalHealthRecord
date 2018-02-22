@@ -104,12 +104,12 @@ class SecurityManage{
      * @param {Express.Response|*} res - 相应对象
      * @return {Boolean} true：有该权限；false：没有该权限。
      */
-    doAuthorization(req,res){
+    async doAuthorization(req,res){
         //获取请求的资源路径用于判断用户是否拥有该资源的权限
         let queryUrl =  req.originalUrl;
 
         //判断用户是否有该权限的资源
-        return this.permissionManage.authorization(this.sessionManage.getCurrentSession() ,queryUrl);
+        return await this.permissionManage.authorization(this.sessionManage.getCurrentSession() ,queryUrl);
     }
 
     /**
@@ -119,7 +119,7 @@ class SecurityManage{
      * @param {Express.Response|*} res - 相应对象
      * @param {Function} next -
      */
-    filterProcessor(req,res,next){
+    async filterProcessor(req,res,next){
         //管理当前请求的sessionId，这是必须的
         this.sessionManage.manageSessionId(req,res);
 
@@ -141,7 +141,7 @@ class SecurityManage{
                 res.end();
             } else {
                 //判断是否含有相应的权限
-                let hasPermission = this.doAuthorization(req,res);
+                let hasPermission = await this.doAuthorization(req,res);
                 if(hasPermission === false){
                     //重定向到没有权限页面
                     res.redirect(this.unauthorizedUrl);
@@ -161,8 +161,8 @@ class SecurityManage{
      * @param {String} userInfo.passWord - 登录的密码
      * @throws {Error} 登录失败时抛出异常
      */
-    login(userInfo){
-        userInfo = this.permissionManage.authentication(userInfo.userName,userInfo.passWord);
+    async login(userInfo){
+        userInfo = await this.permissionManage.authentication(userInfo.userName,userInfo.passWord);
         if(userInfo !== undefined && userInfo !== null) {
             let currentSession = this.sessionManage.getCurrentSession();
             currentSession.isLogin = true;
